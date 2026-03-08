@@ -1,23 +1,14 @@
 spring:
   application:
-    name: cash-service
-  cloud:
-    zookeeper:
-      connect-string: localhost:2181
-      discovery:
-        root: /services
-      config:
-        root: /config
-  config:
-    import: "optional:zookeeper:"
+    name: my-bank-front-app
 
 server:
-  port: 8083
+  port: 8080
 
 resilience4j:
   circuitbreaker:
     instances:
-      cash-service:
+      gateway:
         sliding-window-size: 10
         failure-rate-threshold: 50
         wait-duration-in-open-state: 10s

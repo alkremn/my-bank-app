@@ -1,134 +1,128 @@
 package ru.yandex.practicum.mybankfront.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import ru.yandex.practicum.mybankfront.client.AccountApiClient;
+import ru.yandex.practicum.mybankfront.client.CashApiClient;
+import ru.yandex.practicum.mybankfront.client.TransferApiClient;
+import ru.yandex.practicum.mybankfront.client.dto.AccountResponse;
+import ru.yandex.practicum.mybankfront.controller.dto.AccountDto;
 import ru.yandex.practicum.mybankfront.controller.dto.CashAction;
-import ru.yandex.practicum.mybankfront.controller.stub.AccountStub;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
 
-/**
- * Контроллер main.html.
- *
- * Используемая модель для main.html:
- *      model.addAttribute("name", name);
- *      model.addAttribute("birthdate", birthdate.format(DateTimeFormatter.ISO_DATE));
- *      model.addAttribute("sum", sum);
- *      model.addAttribute("accounts", accounts);
- *      model.addAttribute("errors", errors);
- *      model.addAttribute("info", info);
- *
- * Поля модели:
- *      name - Фамилия Имя текущего пользователя, String (обязательное)
- *      birthdate - дата рождения текущего пользователя, String в формате 'YYYY-MM-DD' (обязательное)
- *      sum - сумма на счету текущего пользователя, Integer (обязательное)
- *      accounts - список аккаунтов, которым можно перевести деньги, List<AccountDto> (обязательное)
- *      errors - список ошибок после выполнения действий, List<String> (не обязательное)
- *      info - строка успешности после выполнения действия, String (не обязательное)
- *
- * С примерами использования можно ознакомиться в тестовом классе заглушке AccountStub
- */
 @Controller
 public class MainController {
-    // TODO: Удалить заглушку, так как используется только для ознакомительных целей
-    @Autowired
-    private AccountStub accountStub;
 
-    /**
-     * GET /.
-     * Редирект на GET /account
-     */
+    // TODO: replace with actual login from Security context
+    private static final String CURRENT_LOGIN = "ivanov";
+
+    private final AccountApiClient accountApiClient;
+    private final CashApiClient cashApiClient;
+    private final TransferApiClient transferApiClient;
+
+    public MainController(AccountApiClient accountApiClient,
+                          CashApiClient cashApiClient,
+                          TransferApiClient transferApiClient) {
+        this.accountApiClient = accountApiClient;
+        this.cashApiClient = cashApiClient;
+        this.transferApiClient = transferApiClient;
+    }
+
     @GetMapping
     public String index() {
         return "redirect:/account";
     }
 
-    /**
-     * GET /account.
-     * Что нужно сделать:
-     * 1. Сходить в сервис accounts через Gateway API для получения данных аккаунта по REST
-     * 2. Заполнить модель main.html полученными из ответа данными
-     * 3. Текущего пользователя можно получить из контекста Security
-     */
     @GetMapping("/account")
     public String getAccount(Model model) {
-        // TODO: Заменить на то, что описано в комментарии к методу
-        accountStub.fillModel(model, null, null);
-
+        try {
+            fillModel(model, null, null);
+        } catch (Exception e) {
+            model.addAttribute("errors", List.of(e.getMessage()));
+        }
         return "main";
     }
 
-    /**
-     * POST /account.
-     * Что нужно сделать:
-     * 1. Сходить в сервис accounts через Gateway API для изменения данных текущего пользователя по REST
-     * 2. Заполнить модель main.html полученными из ответа данными
-     * 3. Текущего пользователя можно получить из контекста Security
-     *
-     * Изменяемые данные:
-     * 1. name - Фамилия Имя
-     * 2. birthdate - дата рождения в формате YYYY-DD-MM
-     */
     @PostMapping("/account")
     public String editAccount(
             Model model,
             @RequestParam("name") String name,
             @RequestParam("birthdate") LocalDate birthdate
     ) {
-        // TODO: Заменить на то, что описано в комментарии к методу
-        accountStub.setNameAndBirthdate(name, birthdate);
-        accountStub.fillModel(model, null, null);
-
+        try {
+            accountApiClient.update(CURRENT_LOGIN, name, birthdate);
+            fillModel(model, null, "Данные обновлены");
+        } catch (Exception e) {
+            fillModelSafe(model);
+            model.addAttribute("errors", List.of(e.getMessage()));
+        }
         return "main";
     }
 
-    /**
-     * POST /cash.
-     * Что нужно сделать:
-     * 1. Сходить в сервис cash через Gateway API для снятия/пополнения счета текущего аккаунта по REST
-     * 2. Заполнить модель main.html полученными из ответа данными
-     * 3. Текущего пользователя можно получить из контекста Security
-     *
-     * Параметры:
-     * 1. value - сумма списания
-     * 2. action - GET (снять), PUT (пополнить)
-     */
     @PostMapping("/cash")
     public String editCash(
             Model model,
             @RequestParam("value") int value,
             @RequestParam("action") CashAction action
-            ) {
-        // TODO: Заменить на то, что описано в комментарии к методу
-        accountStub.editCash(model, value, action);
-
+    ) {
+        try {
+            BigDecimal amount = BigDecimal.valueOf(value);
+            if (action == CashAction.PUT) {
+                cashApiClient.deposit(CURRENT_LOGIN, amount);
+                fillModel(model, null, "Положено %d руб".formatted(value));
+            } else {
+                cashApiClient.withdraw(CURRENT_LOGIN, amount);
+                fillModel(model, null, "Снято %d руб".formatted(value));
+            }
+        } catch (Exception e) {
+            fillModelSafe(model);
+            model.addAttribute("errors", List.of(e.getMessage()));
+        }
         return "main";
     }
 
-    /**
-     * POST /transfer.
-     * Что нужно сделать:
-     * 1. Сходить в сервис accounts через Gateway API для перевода со счета текущего аккаунта на счет другого аккаунта по REST
-     * 2. Заполнить модель main.html полученными из ответа данными
-     * 3. Текущего пользователя можно получить из контекста Security
-     *
-     * Параметры:
-     * 1. value - сумма списания
-     * 2. login - логин пользователя получателя
-     */
     @PostMapping("/transfer")
     public String transfer(
             Model model,
             @RequestParam("value") int value,
             @RequestParam("login") String login
     ) {
-        // TODO: Заменить на то, что описано в комментарии к методу
-        accountStub.transfer(model, value, login);
-
+        try {
+            transferApiClient.transfer(CURRENT_LOGIN, login, BigDecimal.valueOf(value));
+            fillModel(model, null, "Успешно переведено %d руб".formatted(value));
+        } catch (Exception e) {
+            fillModelSafe(model);
+            model.addAttribute("errors", List.of(e.getMessage()));
+        }
         return "main";
+    }
+
+    private void fillModel(Model model, List<String> errors, String info) {
+        AccountResponse account = accountApiClient.getByLogin(CURRENT_LOGIN);
+        List<AccountResponse> allAccounts = accountApiClient.getAll();
+
+        model.addAttribute("name", account.name());
+        model.addAttribute("birthdate", account.birthdate().format(DateTimeFormatter.ISO_DATE));
+        model.addAttribute("sum", account.balance().intValue());
+        model.addAttribute("accounts", allAccounts.stream()
+                .filter(a -> !a.login().equals(CURRENT_LOGIN))
+                .map(a -> new AccountDto(a.login(), a.name()))
+                .toList());
+        model.addAttribute("errors", errors);
+        model.addAttribute("info", info);
+    }
+
+    private void fillModelSafe(Model model) {
+        try {
+            fillModel(model, null, null);
+        } catch (Exception ignored) {
+        }
     }
 }

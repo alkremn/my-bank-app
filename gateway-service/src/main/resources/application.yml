@@ -9,25 +9,27 @@ spring:
       config:
         root: /config
     gateway:
-      routes:
-        - id: accounts-route
-          uri: lb://accounts-service
-          predicates:
-            - Path=/api/accounts/**
-          filters:
-            - StripPrefix=1
-        - id: cash-route
-          uri: lb://cash-service
-          predicates:
-            - Path=/api/cash/**
-          filters:
-            - StripPrefix=1
-        - id: transfer-route
-          uri: lb://transfer-service
-          predicates:
-            - Path=/api/transfers/**
-          filters:
-            - StripPrefix=1
+      server:
+        webmvc:
+          routes:
+            - id: accounts-route
+              uri: lb://accounts-service
+              predicates:
+                - Path=/api/accounts/**
+              filters:
+                - StripPrefix=1
+            - id: cash-route
+              uri: lb://cash-service
+              predicates:
+                - Path=/api/cash/**
+              filters:
+                - StripPrefix=1
+            - id: transfer-route
+              uri: lb://transfer-service
+              predicates:
+                - Path=/api/transfers/**
+              filters:
+                - StripPrefix=1
   config:
     import: "optional:zookeeper:"
 

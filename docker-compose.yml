@@ -6,8 +6,6 @@ services:
       POSTGRES_USER: bankuser
       POSTGRES_PASSWORD: bankpass
       POSTGRES_DB: bankdb
-    ports:
-      - "5432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
       - ./docker/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
@@ -15,8 +13,6 @@ services:
   zookeeper:
     image: zookeeper:3.9
     container_name: my-bank-zookeeper
-    ports:
-      - "2181:2181"
 
   keycloak:
     image: quay.io/keycloak/keycloak:26.2
@@ -29,10 +25,81 @@ services:
       KC_DB_PASSWORD: bankpass
       KC_DB_SCHEMA: keycloak
       KC_HTTP_PORT: 8180
-    ports:
-      - "8180:8180"
     depends_on:
       - postgres
+
+  accounts-service:
+    build:
+      context: .
+      dockerfile: accounts-service/Dockerfile
+    container_name: my-bank-accounts
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/bankdb?currentSchema=accounts
+      SPRING_CLOUD_ZOOKEEPER_CONNECT_STRING: zookeeper:2181
+    depends_on:
+      - postgres
+      - zookeeper
+
+  notification-service:
+    build:
+      context: .
+      dockerfile: notification-service/Dockerfile
+    container_name: my-bank-notifications
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/bankdb?currentSchema=notifications
+      SPRING_CLOUD_ZOOKEEPER_CONNECT_STRING: zookeeper:2181
+    depends_on:
+      - postgres
+      - zookeeper
+
+  cash-service:
+    build:
+      context: .
+      dockerfile: cash-service/Dockerfile
+    container_name: my-bank-cash
+    environment:
+      SPRING_CLOUD_ZOOKEEPER_CONNECT_STRING: zookeeper:2181
+    depends_on:
+      - zookeeper
+      - accounts-service
+      - notification-service
+
+  transfer-service:
+    build:
+      context: .
+      dockerfile: transfer-service/Dockerfile
+    container_name: my-bank-transfer
+    environment:
+      SPRING_CLOUD_ZOOKEEPER_CONNECT_STRING: zookeeper:2181
+    depends_on:
+      - zookeeper
+      - accounts-service
+      - notification-service
+
+  gateway-service:
+    build:
+      context: .
+      dockerfile: gateway-service/Dockerfile
+    container_name: my-bank-gateway
+    environment:
+      SPRING_CLOUD_ZOOKEEPER_CONNECT_STRING: zookeeper:2181
+    depends_on:
+      - zookeeper
+      - accounts-service
+      - cash-service
+      - transfer-service
+
+  front-ui:
+    build:
+      context: .
+      dockerfile: front-ui/Dockerfile
+    container_name: my-bank-front
+    ports:
+      - "8080:8080"
+    environment:
+      GATEWAY_URL: http://gateway-service:8081
+    depends_on:
+      - gateway-service
 
 volumes:
   postgres-data:

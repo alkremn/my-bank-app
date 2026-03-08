@@ -1,5 +1,6 @@
 package co.kremnev.transfer.service;
 
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
@@ -13,6 +14,7 @@ public class TransferService {
 
     private final RestClient.Builder restClientBuilder;
 
+    @CircuitBreaker(name = "transfer-service", fallbackMethod = "transferFallback")
     public void transfer(String fromLogin, String toLogin, BigDecimal amount) {
         restClientBuilder.build()
                 .post()
@@ -32,5 +34,9 @@ public class TransferService {
                 .body(Map.of("login", login, "message", message))
                 .retrieve()
                 .toBodilessEntity();
+    }
+
+    private void transferFallback(String fromLogin, String toLogin, BigDecimal amount, Throwable t) {
+        throw new RuntimeException("Transfer service is unavailable: " + t.getMessage());
     }
 }
