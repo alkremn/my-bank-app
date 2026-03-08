@@ -6,7 +6,6 @@ import java.math.BigDecimal;
 
 @Data
 public class TransferRequestDto {
-    private String fromLogin;
     private String toLogin;
     private BigDecimal amount;
 }

@@ -17,15 +17,15 @@ public class TransferApiClient {
     }
 
     @CircuitBreaker(name = "gateway", fallbackMethod = "transferFallback")
-    public void transfer(String fromLogin, String toLogin, BigDecimal amount) {
+    public void transfer(String toLogin, BigDecimal amount) {
         restClient.post()
                 .uri("/api/transfers")
-                .body(new TransferRequestDto(fromLogin, toLogin, amount))
+                .body(new TransferRequestDto(toLogin, amount))
                 .retrieve()
                 .toBodilessEntity();
     }
 
-    private void transferFallback(String fromLogin, String toLogin, BigDecimal amount, Throwable t) {
+    private void transferFallback(String toLogin, BigDecimal amount, Throwable t) {
         throw new RuntimeException("Transfer service is unavailable: " + t.getMessage());
     }
 }

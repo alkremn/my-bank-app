@@ -8,6 +8,11 @@ spring:
         root: /services
       config:
         root: /config
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8180/realms/my-bank
   config:
     import: "optional:zookeeper:"
   datasource:

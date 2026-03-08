@@ -1,38 +1,24 @@
 package ru.yandex.practicum.mybankfront.controller;
 
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import ru.yandex.practicum.mybankfront.client.AccountApiClient;
-import ru.yandex.practicum.mybankfront.client.CashApiClient;
-import ru.yandex.practicum.mybankfront.client.TransferApiClient;
-import ru.yandex.practicum.mybankfront.client.dto.AccountResponse;
-import ru.yandex.practicum.mybankfront.controller.dto.AccountDto;
 import ru.yandex.practicum.mybankfront.controller.dto.CashAction;
+import ru.yandex.practicum.mybankfront.service.BankService;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Controller
 public class MainController {
 
-    // TODO: replace with actual login from Security context
-    private static final String CURRENT_LOGIN = "ivanov";
+    private final BankService bankService;
 
-    private final AccountApiClient accountApiClient;
-    private final CashApiClient cashApiClient;
-    private final TransferApiClient transferApiClient;
-
-    public MainController(AccountApiClient accountApiClient,
-                          CashApiClient cashApiClient,
-                          TransferApiClient transferApiClient) {
-        this.accountApiClient = accountApiClient;
-        this.cashApiClient = cashApiClient;
-        this.transferApiClient = transferApiClient;
+    public MainController(BankService bankService) {
+        this.bankService = bankService;
     }
 
     @GetMapping
@@ -41,9 +27,9 @@ public class MainController {
     }
 
     @GetMapping("/account")
-    public String getAccount(Model model) {
+    public String getAccount(Model model, OAuth2AuthenticationToken auth) {
         try {
-            fillModel(model, null, null);
+            bankService.loadAccount(model, getLogin(auth));
         } catch (Exception e) {
             model.addAttribute("errors", List.of(e.getMessage()));
         }
@@ -51,77 +37,54 @@ public class MainController {
     }
 
     @PostMapping("/account")
-    public String editAccount(
-            Model model,
-            @RequestParam("name") String name,
-            @RequestParam("birthdate") LocalDate birthdate
-    ) {
+    public String editAccount(Model model, OAuth2AuthenticationToken auth,
+                              @RequestParam("name") String name,
+                              @RequestParam("birthdate") LocalDate birthdate) {
+        String login = getLogin(auth);
         try {
-            accountApiClient.update(CURRENT_LOGIN, name, birthdate);
-            fillModel(model, null, "Данные обновлены");
+            bankService.updateAccount(model, login, name, birthdate);
         } catch (Exception e) {
-            fillModelSafe(model);
+            safeLoad(model, login);
             model.addAttribute("errors", List.of(e.getMessage()));
         }
         return "main";
     }
 
     @PostMapping("/cash")
-    public String editCash(
-            Model model,
-            @RequestParam("value") int value,
-            @RequestParam("action") CashAction action
-    ) {
+    public String editCash(Model model, OAuth2AuthenticationToken auth,
+                           @RequestParam("value") int value,
+                           @RequestParam("action") CashAction action) {
+        String login = getLogin(auth);
         try {
-            BigDecimal amount = BigDecimal.valueOf(value);
-            if (action == CashAction.PUT) {
-                cashApiClient.deposit(CURRENT_LOGIN, amount);
-                fillModel(model, null, "Положено %d руб".formatted(value));
-            } else {
-                cashApiClient.withdraw(CURRENT_LOGIN, amount);
-                fillModel(model, null, "Снято %d руб".formatted(value));
-            }
+            bankService.processCash(model, login, value, action);
         } catch (Exception e) {
-            fillModelSafe(model);
+            safeLoad(model, login);
             model.addAttribute("errors", List.of(e.getMessage()));
         }
         return "main";
     }
 
     @PostMapping("/transfer")
-    public String transfer(
-            Model model,
-            @RequestParam("value") int value,
-            @RequestParam("login") String login
-    ) {
+    public String transfer(Model model, OAuth2AuthenticationToken auth,
+                           @RequestParam("value") int value,
+                           @RequestParam("login") String targetLogin) {
+        String login = getLogin(auth);
         try {
-            transferApiClient.transfer(CURRENT_LOGIN, login, BigDecimal.valueOf(value));
-            fillModel(model, null, "Успешно переведено %d руб".formatted(value));
+            bankService.processTransfer(model, login, targetLogin, value);
         } catch (Exception e) {
-            fillModelSafe(model);
+            safeLoad(model, login);
             model.addAttribute("errors", List.of(e.getMessage()));
         }
         return "main";
     }
 
-    private void fillModel(Model model, List<String> errors, String info) {
-        AccountResponse account = accountApiClient.getByLogin(CURRENT_LOGIN);
-        List<AccountResponse> allAccounts = accountApiClient.getAll();
-
-        model.addAttribute("name", account.name());
-        model.addAttribute("birthdate", account.birthdate().format(DateTimeFormatter.ISO_DATE));
-        model.addAttribute("sum", account.balance().intValue());
-        model.addAttribute("accounts", allAccounts.stream()
-                .filter(a -> !a.login().equals(CURRENT_LOGIN))
-                .map(a -> new AccountDto(a.login(), a.name()))
-                .toList());
-        model.addAttribute("errors", errors);
-        model.addAttribute("info", info);
+    private String getLogin(OAuth2AuthenticationToken auth) {
+        return auth.getPrincipal().getAttribute("preferred_username");
     }
 
-    private void fillModelSafe(Model model) {
+    private void safeLoad(Model model, String login) {
         try {
-            fillModel(model, null, null);
+            bankService.loadAccount(model, login);
         } catch (Exception ignored) {
         }
     }

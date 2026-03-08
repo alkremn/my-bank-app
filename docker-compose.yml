@@ -17,7 +17,7 @@ services:
   keycloak:
     image: quay.io/keycloak/keycloak:26.2
     container_name: my-bank-keycloak
-    command: start-dev
+    command: start-dev --import-realm
     environment:
       KC_DB: postgres
       KC_DB_URL: jdbc:postgresql://postgres:5432/bankdb
@@ -25,6 +25,12 @@ services:
       KC_DB_PASSWORD: bankpass
       KC_DB_SCHEMA: keycloak
       KC_HTTP_PORT: 8180
+      KC_HOSTNAME: localhost
+      KC_HOSTNAME_PORT: 8180
+    ports:
+      - "8180:8180"
+    volumes:
+      - ./docker/my-bank-realm.json:/opt/keycloak/data/import/my-bank-realm.json
     depends_on:
       - postgres
 
@@ -36,9 +42,12 @@ services:
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/bankdb?currentSchema=accounts
       SPRING_CLOUD_ZOOKEEPER_CONNECT_STRING: zookeeper:2181
+      SPRING_CLOUD_ZOOKEEPER_DISCOVERY_INSTANCE_HOST: accounts-service
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8180/realms/my-bank/protocol/openid-connect/certs
     depends_on:
       - postgres
       - zookeeper
+      - keycloak
 
   notification-service:
     build:
@@ -48,9 +57,12 @@ services:
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/bankdb?currentSchema=notifications
       SPRING_CLOUD_ZOOKEEPER_CONNECT_STRING: zookeeper:2181
+      SPRING_CLOUD_ZOOKEEPER_DISCOVERY_INSTANCE_HOST: notification-service
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8180/realms/my-bank/protocol/openid-connect/certs
     depends_on:
       - postgres
       - zookeeper
+      - keycloak
 
   cash-service:
     build:
@@ -59,10 +71,14 @@ services:
     container_name: my-bank-cash
     environment:
       SPRING_CLOUD_ZOOKEEPER_CONNECT_STRING: zookeeper:2181
+      SPRING_CLOUD_ZOOKEEPER_DISCOVERY_INSTANCE_HOST: cash-service
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8180/realms/my-bank/protocol/openid-connect/certs
+      SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_CASH_SERVICE_CLIENT_TOKEN_URI: http://keycloak:8180/realms/my-bank/protocol/openid-connect/token
     depends_on:
       - zookeeper
       - accounts-service
       - notification-service
+      - keycloak
 
   transfer-service:
     build:
@@ -71,10 +87,14 @@ services:
     container_name: my-bank-transfer
     environment:
       SPRING_CLOUD_ZOOKEEPER_CONNECT_STRING: zookeeper:2181
+      SPRING_CLOUD_ZOOKEEPER_DISCOVERY_INSTANCE_HOST: transfer-service
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8180/realms/my-bank/protocol/openid-connect/certs
+      SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_TRANSFER_SERVICE_CLIENT_TOKEN_URI: http://keycloak:8180/realms/my-bank/protocol/openid-connect/token
     depends_on:
       - zookeeper
       - accounts-service
       - notification-service
+      - keycloak
 
   gateway-service:
     build:
@@ -83,6 +103,7 @@ services:
     container_name: my-bank-gateway
     environment:
       SPRING_CLOUD_ZOOKEEPER_CONNECT_STRING: zookeeper:2181
+      SPRING_CLOUD_ZOOKEEPER_DISCOVERY_INSTANCE_HOST: gateway-service
     depends_on:
       - zookeeper
       - accounts-service
@@ -98,8 +119,12 @@ services:
       - "8080:8080"
     environment:
       GATEWAY_URL: http://gateway-service:8081
+      SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_TOKEN_URI: http://keycloak:8180/realms/my-bank/protocol/openid-connect/token
+      SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_JWK_SET_URI: http://keycloak:8180/realms/my-bank/protocol/openid-connect/certs
+      SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_USER_INFO_URI: http://keycloak:8180/realms/my-bank/protocol/openid-connect/userinfo
     depends_on:
       - gateway-service
+      - keycloak
 
 volumes:
   postgres-data:

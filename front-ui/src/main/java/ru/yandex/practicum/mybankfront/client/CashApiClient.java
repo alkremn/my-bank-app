@@ -17,28 +17,28 @@ public class CashApiClient {
     }
 
     @CircuitBreaker(name = "gateway", fallbackMethod = "depositFallback")
-    public void deposit(String login, BigDecimal amount) {
+    public void deposit(BigDecimal amount) {
         restClient.post()
                 .uri("/api/cash/deposit")
-                .body(new CashRequestDto(login, amount))
+                .body(new CashRequestDto(amount))
                 .retrieve()
                 .toBodilessEntity();
     }
 
     @CircuitBreaker(name = "gateway", fallbackMethod = "withdrawFallback")
-    public void withdraw(String login, BigDecimal amount) {
+    public void withdraw(BigDecimal amount) {
         restClient.post()
                 .uri("/api/cash/withdraw")
-                .body(new CashRequestDto(login, amount))
+                .body(new CashRequestDto(amount))
                 .retrieve()
                 .toBodilessEntity();
     }
 
-    private void depositFallback(String login, BigDecimal amount, Throwable t) {
+    private void depositFallback(BigDecimal amount, Throwable t) {
         throw new RuntimeException("Cash service is unavailable: " + t.getMessage());
     }
 
-    private void withdrawFallback(String login, BigDecimal amount, Throwable t) {
+    private void withdrawFallback(BigDecimal amount, Throwable t) {
         throw new RuntimeException("Cash service is unavailable: " + t.getMessage());
     }
 }

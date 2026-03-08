@@ -8,6 +8,21 @@ spring:
         root: /services
       config:
         root: /config
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8180/realms/my-bank
+      client:
+        registration:
+          cash-service-client:
+            client-id: cash-service-client
+            client-secret: cash-secret
+            authorization-grant-type: client_credentials
+            scope: accounts,notifications
+        provider:
+          cash-service-client:
+            token-uri: http://localhost:8180/realms/my-bank/protocol/openid-connect/token
   config:
     import: "optional:zookeeper:"
 

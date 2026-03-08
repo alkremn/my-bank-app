@@ -6,6 +6,5 @@ import java.math.BigDecimal;
 
 @Data
 public class CashRequestDto {
-    private String login;
     private BigDecimal amount;
 }
