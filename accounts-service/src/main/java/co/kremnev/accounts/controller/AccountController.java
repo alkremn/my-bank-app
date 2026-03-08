@@ -2,6 +2,7 @@ package co.kremnev.accounts.controller;
 
 import co.kremnev.accounts.controller.dto.AccountDto;
 import co.kremnev.accounts.controller.dto.BalanceUpdateDto;
+import co.kremnev.accounts.controller.dto.TransferDto;
 import co.kremnev.accounts.model.Account;
 import co.kremnev.accounts.service.AccountService;
 import lombok.RequiredArgsConstructor;
@@ -39,5 +40,10 @@ public class AccountController {
     @PostMapping("/{login}/balance")
     public Account updateBalance(@PathVariable String login, @RequestBody BalanceUpdateDto dto) {
         return accountService.updateBalance(login, dto.getAmount());
+    }
+
+    @PostMapping("/transfer")
+    public void transfer(@RequestBody TransferDto dto) {
+        accountService.transfer(dto.getFromLogin(), dto.getToLogin(), dto.getAmount());
     }
 }

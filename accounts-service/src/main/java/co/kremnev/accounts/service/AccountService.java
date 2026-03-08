@@ -5,6 +5,7 @@ import co.kremnev.accounts.model.Account;
 import co.kremnev.accounts.repository.AccountRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -34,6 +35,12 @@ public class AccountService {
         account.setName(dto.getName());
         account.setBirthdate(dto.getBirthdate());
         return accountRepository.save(account);
+    }
+
+    @Transactional
+    public void transfer(String fromLogin, String toLogin, BigDecimal amount) {
+        updateBalance(fromLogin, amount.negate());
+        updateBalance(toLogin, amount);
     }
 
     public Account updateBalance(String login, BigDecimal amount) {
