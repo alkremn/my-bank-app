@@ -11,5 +11,5 @@ CREATE TABLE IF NOT EXISTS accounts.accounts (
 );
 
 INSERT INTO accounts.accounts (login, name, birthdate, balance) VALUES
-    ('ivanov', 'Иванов Иван', '2001-01-01', 1000.00),
-    ('petrov', 'Петров Петр', '1995-05-15', 500.00);
+    ('ivanov@test.com', 'Иванов Иван', '2001-01-01', 1000.00),
+    ('petrov@test.com', 'Петров Петр', '1995-05-15', 500.00);

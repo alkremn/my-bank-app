@@ -154,7 +154,7 @@
   ],
   "users": [
     {
-      "username": "ivanov",
+      "username": "ivanov@test.com",
       "enabled": true,
       "email": "ivanov@test.com",
       "emailVerified": true,

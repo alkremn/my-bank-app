@@ -1,6 +1,15 @@
 spring:
   application:
     name: my-bank-front-app
+  cloud:
+    zookeeper:
+      connect-string: localhost:2181
+      discovery:
+        root: /services
+      config:
+        root: /config
+  config:
+    import: "optional:zookeeper:"
   security:
     oauth2:
       client:
