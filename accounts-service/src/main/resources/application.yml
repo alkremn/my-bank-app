@@ -10,6 +10,16 @@ spring:
         root: /config
   config:
     import: "optional:zookeeper:"
+  datasource:
+    url: jdbc:postgresql://localhost:5432/bankdb?currentSchema=accounts
+    username: bankuser
+    password: bankpass
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        default_schema: accounts
 
 server:
   port: 8082
