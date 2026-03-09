@@ -17,6 +17,8 @@ create /config/application/spring.datasource.password "bankpass"
 create /config/accounts-service ""
 create /config/accounts-service/spring.datasource.url "jdbc:postgresql://postgres:5432/bankdb?currentSchema=accounts"
 create /config/accounts-service/spring.security.oauth2.resourceserver.jwt.jwk-set-uri "http://keycloak:8180/realms/my-bank/protocol/openid-connect/certs"
+create /config/accounts-service/spring.security.oauth2.client.registration.accounts-service-client.client-secret "accounts-secret"
+create /config/accounts-service/spring.security.oauth2.client.provider.accounts-service-client.token-uri "http://keycloak:8180/realms/my-bank/protocol/openid-connect/token"
 
 create /config/notification-service ""
 create /config/notification-service/spring.datasource.url "jdbc:postgresql://postgres:5432/bankdb?currentSchema=notifications"

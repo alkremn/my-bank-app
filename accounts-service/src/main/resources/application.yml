@@ -13,6 +13,16 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: http://localhost:8180/realms/my-bank
+      client:
+        registration:
+          accounts-service-client:
+            client-id: accounts-service-client
+            client-secret: accounts-secret
+            authorization-grant-type: client_credentials
+            scope: notifications
+        provider:
+          accounts-service-client:
+            token-uri: http://localhost:8180/realms/my-bank/protocol/openid-connect/token
   config:
     import: "optional:zookeeper:"
   datasource:

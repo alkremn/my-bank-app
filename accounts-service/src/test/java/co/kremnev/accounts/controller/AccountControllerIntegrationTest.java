@@ -93,17 +93,17 @@ class AccountControllerIntegrationTest {
     }
 
     @Test
-    void updateBalance_insufficientFunds_throwsException() {
+    void updateBalance_insufficientFunds_returnsBadRequest() throws Exception {
         accountRepository.save(new Account(null, "ivanov", "Ivan", LocalDate.of(1990, 1, 1), BigDecimal.valueOf(100)));
 
-        assertThrows(Exception.class, () ->
-                mockMvc.perform(post("/accounts/ivanov/balance")
-                                .with(jwt().authorities(() -> "SCOPE_accounts"))
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content("""
-                                        {"amount": -200}
-                                        """))
-                        .andExpect(status().isInternalServerError()));
+        mockMvc.perform(post("/accounts/ivanov/balance")
+                        .with(jwt().authorities(() -> "SCOPE_accounts"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"amount": -200}
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value(org.hamcrest.Matchers.containsString("Недостаточно средств")));
     }
 
     @Test

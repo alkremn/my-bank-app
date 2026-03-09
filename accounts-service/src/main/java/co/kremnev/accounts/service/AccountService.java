@@ -4,17 +4,22 @@ import co.kremnev.accounts.controller.dto.AccountDto;
 import co.kremnev.accounts.model.Account;
 import co.kremnev.accounts.repository.AccountRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestClient;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
 public class AccountService {
 
     private final AccountRepository accountRepository;
+    private final RestClient.Builder restClientBuilder;
 
     public Account create(AccountDto dto) {
         var account = new Account(null, dto.getLogin(), dto.getName(), dto.getBirthdate(), BigDecimal.ZERO);
@@ -23,7 +28,7 @@ public class AccountService {
 
     public Account getByLogin(String login) {
         return accountRepository.findByLogin(login)
-                .orElseThrow(() -> new RuntimeException("Account not found: " + login));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Аккаунт не найден: " + login));
     }
 
     public List<Account> getAll() {
@@ -47,9 +52,25 @@ public class AccountService {
         var account = getByLogin(login);
         var newBalance = account.getBalance().add(amount);
         if (newBalance.compareTo(BigDecimal.ZERO) < 0) {
-            throw new RuntimeException("Insufficient funds for account: " + login);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Недостаточно средств на счёте: " + login);
         }
         account.setBalance(newBalance);
-        return accountRepository.save(account);
+        var saved = accountRepository.save(account);
+        String action = amount.compareTo(BigDecimal.ZERO) >= 0 ? "пополнение" : "списание";
+        notify(login, "Баланс изменён (%s): %s руб".formatted(action, amount));
+        return saved;
+    }
+
+    private void notify(String login, String message) {
+        try {
+            restClientBuilder.build()
+                    .post()
+                    .uri("http://notification-service/notifications")
+                    .body(Map.of("login", login, "message", message))
+                    .retrieve()
+                    .toBodilessEntity();
+        } catch (Exception ignored) {
+            // notification is best-effort
+        }
     }
 }

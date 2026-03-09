@@ -8,6 +8,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.web.client.RestClient;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -23,6 +24,9 @@ class AccountServiceTest {
 
     @Mock
     private AccountRepository accountRepository;
+
+    @Mock(answer = org.mockito.Answers.RETURNS_DEEP_STUBS)
+    private RestClient.Builder restClientBuilder;
 
     @InjectMocks
     private AccountService accountService;
@@ -61,7 +65,7 @@ class AccountServiceTest {
         when(accountRepository.findByLogin("unknown")).thenReturn(Optional.empty());
 
         var ex = assertThrows(RuntimeException.class, () -> accountService.getByLogin("unknown"));
-        assertTrue(ex.getMessage().contains("Account not found"));
+        assertTrue(ex.getMessage().contains("Аккаунт не найден"));
     }
 
     @Test
@@ -112,7 +116,7 @@ class AccountServiceTest {
 
         var ex = assertThrows(RuntimeException.class,
                 () -> accountService.updateBalance("ivanov", BigDecimal.valueOf(-200)));
-        assertTrue(ex.getMessage().contains("Insufficient funds"));
+        assertTrue(ex.getMessage().contains("Недостаточно средств"));
     }
 
     @Test
