@@ -16,6 +16,11 @@
 
 <dependencies>
     <dependency>
+        <groupId>co.kremnev</groupId>
+        <artifactId>my-bank-starter</artifactId>
+        <version>${project.version}</version>
+    </dependency>
+    <dependency>
         <groupId>org.springframework.cloud</groupId>
         <artifactId>spring-cloud-starter-zookeeper-discovery</artifactId>
     </dependency>

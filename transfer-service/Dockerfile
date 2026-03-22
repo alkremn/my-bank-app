@@ -8,6 +8,7 @@ COPY transfer-service/pom.xml transfer-service/
 COPY notification-service/pom.xml notification-service/
 COPY gateway-service/pom.xml gateway-service/
 COPY front-ui/pom.xml front-ui/
+COPY my-bank-starter/pom.xml my-bank-starter/
 
 COPY mvnw .
 COPY .mvn .mvn
@@ -15,6 +16,7 @@ RUN chmod +x mvnw
 
 RUN ./mvnw dependency:go-offline -pl transfer-service -am -B
 
+COPY my-bank-starter/src my-bank-starter/src
 COPY transfer-service/src transfer-service/src
 
 RUN ./mvnw -pl transfer-service -am clean package -DskipTests

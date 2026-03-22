@@ -26,6 +26,12 @@ spring:
   config:
     import: "optional:zookeeper:"
 
+my-bank:
+  security:
+    scope: cash
+  oauth2-client:
+    registration-id: cash-service-client
+
 server:
   port: 8083
 

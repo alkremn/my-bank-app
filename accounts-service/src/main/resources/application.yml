@@ -36,5 +36,11 @@ spring:
       hibernate:
         default_schema: accounts
 
+my-bank:
+  security:
+    scope: accounts
+  oauth2-client:
+    registration-id: accounts-service-client
+
 server:
   port: 8082

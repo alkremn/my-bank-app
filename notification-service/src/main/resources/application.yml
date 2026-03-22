@@ -26,5 +26,9 @@ spring:
       hibernate:
         default_schema: notifications
 
+my-bank:
+  security:
+    scope: notifications
+
 server:
   port: 8085

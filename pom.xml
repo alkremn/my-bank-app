@@ -24,6 +24,7 @@
       </properties>
 
       <modules>
+          <module>my-bank-starter</module>
           <module>front-ui</module>
           <module>accounts-service</module>
           <module>cash-service</module>
