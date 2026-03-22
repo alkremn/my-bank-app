@@ -17,11 +17,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-@SpringBootTest(properties = {
-        "spring.cloud.zookeeper.enabled=false",
-        "spring.cloud.zookeeper.discovery.enabled=false",
-        "spring.cloud.zookeeper.config.enabled=false"
-})
+@SpringBootTest
 @Testcontainers
 @AutoConfigureMockMvc
 public abstract class ContractTestBase {

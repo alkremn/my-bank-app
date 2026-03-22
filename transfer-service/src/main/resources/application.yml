@@ -1,30 +1,21 @@
 spring:
   application:
     name: transfer-service
-  cloud:
-    zookeeper:
-      connect-string: localhost:2181
-      discovery:
-        root: /services
-      config:
-        root: /config
   security:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://localhost:8180/realms/my-bank
+          jwk-set-uri: ${KEYCLOAK_JWK_URI:http://localhost:8180/realms/my-bank/protocol/openid-connect/certs}
       client:
         registration:
           transfer-service-client:
-            client-id: transfer-service-client
-            client-secret: transfer-secret
+            client-id: ${OAUTH2_CLIENT_ID:transfer-service-client}
+            client-secret: ${OAUTH2_CLIENT_SECRET:transfer-secret}
             authorization-grant-type: client_credentials
             scope: accounts,notifications
         provider:
           transfer-service-client:
-            token-uri: http://localhost:8180/realms/my-bank/protocol/openid-connect/token
-  config:
-    import: "optional:zookeeper:"
+            token-uri: ${KEYCLOAK_TOKEN_URI:http://localhost:8180/realms/my-bank/protocol/openid-connect/token}
 
 my-bank:
   security:
