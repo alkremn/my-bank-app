@@ -1,0 +1,161 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: my-bank-postgres
+    environment:
+      POSTGRES_USER: bankuser
+      POSTGRES_PASSWORD: bankpass
+      POSTGRES_DB: bankdb
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./docker/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+
+  zookeeper:
+    image: zookeeper:3.9
+    container_name: my-bank-zookeeper
+
+  zk-init:
+    image: zookeeper:3.9
+    container_name: my-bank-zk-init
+    volumes:
+      - ./docker/init-zk.sh:/init-zk.sh
+    entrypoint: /bin/bash
+    command: /init-zk.sh
+    depends_on:
+      - zookeeper
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.2
+    container_name: my-bank-keycloak
+    command: start-dev --import-realm
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/bankdb
+      KC_DB_USERNAME: bankuser
+      KC_DB_PASSWORD: bankpass
+      KC_DB_SCHEMA: keycloak
+      KC_HTTP_PORT: 8180
+      KC_HOSTNAME: localhost
+      KC_HOSTNAME_PORT: 8180
+    ports:
+      - "8180:8180"
+    volumes:
+      - ./docker/my-bank-realm.json:/opt/keycloak/data/import/my-bank-realm.json
+    depends_on:
+      - postgres
+
+  accounts-service:
+    build:
+      context: .
+      dockerfile: accounts-service/Dockerfile
+    container_name: my-bank-accounts
+    environment:
+      SPRING_CLOUD_ZOOKEEPER_CONNECT_STRING: zookeeper:2181
+      SPRING_CLOUD_ZOOKEEPER_DISCOVERY_INSTANCE_HOST: accounts-service
+    depends_on:
+      postgres:
+        condition: service_started
+      zookeeper:
+        condition: service_started
+      zk-init:
+        condition: service_completed_successfully
+      keycloak:
+        condition: service_started
+
+  notification-service:
+    build:
+      context: .
+      dockerfile: notification-service/Dockerfile
+    container_name: my-bank-notifications
+    environment:
+      SPRING_CLOUD_ZOOKEEPER_CONNECT_STRING: zookeeper:2181
+      SPRING_CLOUD_ZOOKEEPER_DISCOVERY_INSTANCE_HOST: notification-service
+    depends_on:
+      postgres:
+        condition: service_started
+      zookeeper:
+        condition: service_started
+      zk-init:
+        condition: service_completed_successfully
+      keycloak:
+        condition: service_started
+
+  cash-service:
+    build:
+      context: .
+      dockerfile: cash-service/Dockerfile
+    container_name: my-bank-cash
+    environment:
+      SPRING_CLOUD_ZOOKEEPER_CONNECT_STRING: zookeeper:2181
+      SPRING_CLOUD_ZOOKEEPER_DISCOVERY_INSTANCE_HOST: cash-service
+    depends_on:
+      zookeeper:
+        condition: service_started
+      zk-init:
+        condition: service_completed_successfully
+      accounts-service:
+        condition: service_started
+      notification-service:
+        condition: service_started
+      keycloak:
+        condition: service_started
+
+  transfer-service:
+    build:
+      context: .
+      dockerfile: transfer-service/Dockerfile
+    container_name: my-bank-transfer
+    environment:
+      SPRING_CLOUD_ZOOKEEPER_CONNECT_STRING: zookeeper:2181
+      SPRING_CLOUD_ZOOKEEPER_DISCOVERY_INSTANCE_HOST: transfer-service
+    depends_on:
+      zookeeper:
+        condition: service_started
+      zk-init:
+        condition: service_completed_successfully
+      accounts-service:
+        condition: service_started
+      notification-service:
+        condition: service_started
+      keycloak:
+        condition: service_started
+
+  gateway-service:
+    build:
+      context: .
+      dockerfile: gateway-service/Dockerfile
+    container_name: my-bank-gateway
+    environment:
+      SPRING_CLOUD_ZOOKEEPER_CONNECT_STRING: zookeeper:2181
+      SPRING_CLOUD_ZOOKEEPER_DISCOVERY_INSTANCE_HOST: gateway-service
+    depends_on:
+      zookeeper:
+        condition: service_started
+      accounts-service:
+        condition: service_started
+      cash-service:
+        condition: service_started
+      transfer-service:
+        condition: service_started
+
+  front-ui:
+    build:
+      context: .
+      dockerfile: front-ui/Dockerfile
+    container_name: my-bank-front
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_CLOUD_ZOOKEEPER_CONNECT_STRING: zookeeper:2181
+    depends_on:
+      zookeeper:
+        condition: service_started
+      zk-init:
+        condition: service_completed_successfully
+      gateway-service:
+        condition: service_started
+      keycloak:
+        condition: service_started
+
+volumes:
+  postgres-data:

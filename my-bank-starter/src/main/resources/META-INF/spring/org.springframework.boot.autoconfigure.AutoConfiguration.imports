@@ -1,0 +1,3 @@
+co.kremnev.starter.ResourceServerSecurityAutoConfiguration
+co.kremnev.starter.ServiceRestClientAutoConfiguration
+co.kremnev.starter.ServiceErrorHandlerAutoConfiguration

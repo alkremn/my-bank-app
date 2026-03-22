@@ -1,5 +1,47 @@
 spring:
   application:
     name: cash-service
+  cloud:
+    zookeeper:
+      connect-string: localhost:2181
+      discovery:
+        root: /services
+      config:
+        root: /config
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8180/realms/my-bank
+      client:
+        registration:
+          cash-service-client:
+            client-id: cash-service-client
+            client-secret: cash-secret
+            authorization-grant-type: client_credentials
+            scope: accounts,notifications
+        provider:
+          cash-service-client:
+            token-uri: http://localhost:8180/realms/my-bank/protocol/openid-connect/token
+  config:
+    import: "optional:zookeeper:"
+
+my-bank:
+  security:
+    scope: cash
+  oauth2-client:
+    registration-id: cash-service-client
+
 server:
   port: 8083
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      cash-service:
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
+        permitted-number-of-calls-in-half-open-state: 3
+        ignoreExceptions:
+          - org.springframework.web.client.HttpClientErrorException

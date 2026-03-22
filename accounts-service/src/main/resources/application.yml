@@ -1,5 +1,46 @@
 spring:
   application:
     name: accounts-service
+  cloud:
+    zookeeper:
+      connect-string: localhost:2181
+      discovery:
+        root: /services
+      config:
+        root: /config
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8180/realms/my-bank
+      client:
+        registration:
+          accounts-service-client:
+            client-id: accounts-service-client
+            client-secret: accounts-secret
+            authorization-grant-type: client_credentials
+            scope: notifications
+        provider:
+          accounts-service-client:
+            token-uri: http://localhost:8180/realms/my-bank/protocol/openid-connect/token
+  config:
+    import: "optional:zookeeper:"
+  datasource:
+    url: jdbc:postgresql://localhost:5432/bankdb?currentSchema=accounts
+    username: bankuser
+    password: bankpass
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        default_schema: accounts
+
+my-bank:
+  security:
+    scope: accounts
+  oauth2-client:
+    registration-id: accounts-service-client
+
 server:
   port: 8082
