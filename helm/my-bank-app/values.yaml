@@ -1,0 +1,97 @@
+postgresql:
+  fullnameOverride: postgresql
+  image:
+    repository: postgres
+    tag: "17"
+  auth:
+    username: bankuser
+    password: bankpass
+    database: bankdb
+  storage:
+    size: 1Gi
+
+keycloak:
+  fullnameOverride: keycloak
+  image:
+    repository: quay.io/keycloak/keycloak
+    tag: "26.2"
+  service:
+    nodePort: 30180
+  db:
+    url: jdbc:postgresql://postgresql:5432/bankdb
+    username: bankuser
+    password: bankpass
+    schema: keycloak
+  hostname: localhost
+  hostnamePort: 30180
+
+accounts-service:
+  fullnameOverride: accounts-service
+  image:
+    repository: my-bank/accounts-service
+    tag: latest
+  containerPort: 8082
+  env:
+    DB_URL: jdbc:postgresql://postgresql:5432/bankdb?currentSchema=accounts
+    DB_USERNAME: bankuser
+    KEYCLOAK_JWK_URI: http://keycloak:8180/realms/my-bank/protocol/openid-connect/certs
+    KEYCLOAK_TOKEN_URI: http://keycloak:8180/realms/my-bank/protocol/openid-connect/token
+    OAUTH2_CLIENT_ID: accounts-service-client
+  secrets:
+    DB_PASSWORD: bankpass
+    OAUTH2_CLIENT_SECRET: accounts-secret
+
+cash-service:
+  fullnameOverride: cash-service
+  image:
+    repository: my-bank/cash-service
+    tag: latest
+  containerPort: 8083
+  env:
+    KEYCLOAK_JWK_URI: http://keycloak:8180/realms/my-bank/protocol/openid-connect/certs
+    KEYCLOAK_TOKEN_URI: http://keycloak:8180/realms/my-bank/protocol/openid-connect/token
+    OAUTH2_CLIENT_ID: cash-service-client
+  secrets:
+    OAUTH2_CLIENT_SECRET: cash-secret
+
+transfer-service:
+  fullnameOverride: transfer-service
+  image:
+    repository: my-bank/transfer-service
+    tag: latest
+  containerPort: 8084
+  env:
+    KEYCLOAK_JWK_URI: http://keycloak:8180/realms/my-bank/protocol/openid-connect/certs
+    KEYCLOAK_TOKEN_URI: http://keycloak:8180/realms/my-bank/protocol/openid-connect/token
+    OAUTH2_CLIENT_ID: transfer-service-client
+  secrets:
+    OAUTH2_CLIENT_SECRET: transfer-secret
+
+notification-service:
+  fullnameOverride: notification-service
+  image:
+    repository: my-bank/notification-service
+    tag: latest
+  containerPort: 8085
+  env:
+    DB_URL: jdbc:postgresql://postgresql:5432/bankdb?currentSchema=notifications
+    DB_USERNAME: bankuser
+    KEYCLOAK_JWK_URI: http://keycloak:8180/realms/my-bank/protocol/openid-connect/certs
+  secrets:
+    DB_PASSWORD: bankpass
+
+front-ui:
+  fullnameOverride: front-ui
+  image:
+    repository: my-bank/front-ui
+    tag: latest
+  containerPort: 8080
+  env:
+    ACCOUNTS_SERVICE_URL: http://accounts-service
+    CASH_SERVICE_URL: http://cash-service
+    TRANSFER_SERVICE_URL: http://transfer-service
+    KEYCLOAK_AUTH_URI: http://localhost:30180/realms/my-bank/protocol/openid-connect/auth
+    KEYCLOAK_TOKEN_URI: http://keycloak:8180/realms/my-bank/protocol/openid-connect/token
+    KEYCLOAK_JWK_URI: http://keycloak:8180/realms/my-bank/protocol/openid-connect/certs
+    KEYCLOAK_USERINFO_URI: http://keycloak:8180/realms/my-bank/protocol/openid-connect/userinfo
+    KEYCLOAK_LOGOUT_URI: http://localhost:30180/realms/my-bank/protocol/openid-connect/logout

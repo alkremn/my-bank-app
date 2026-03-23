@@ -1,0 +1,7 @@
+fullnameOverride: accounts-service
+image:
+  repository: my-bank/accounts-service
+  tag: latest
+containerPort: 8082
+env: {}
+secrets: {}

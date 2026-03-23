@@ -1,0 +1,10 @@
+fullnameOverride: postgresql
+image:
+  repository: postgres
+  tag: "17"
+auth:
+  username: bankuser
+  password: bankpass
+  database: bankdb
+storage:
+  size: 1Gi

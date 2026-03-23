@@ -13,10 +13,10 @@ spring:
             scope: openid,profile,accounts,cash,transfer,notifications
         provider:
           keycloak:
-            authorization-uri: http://localhost:8180/realms/my-bank/protocol/openid-connect/auth
-            token-uri: http://localhost:8180/realms/my-bank/protocol/openid-connect/token
-            jwk-set-uri: http://localhost:8180/realms/my-bank/protocol/openid-connect/certs
-            user-info-uri: http://localhost:8180/realms/my-bank/protocol/openid-connect/userinfo
+            authorization-uri: ${KEYCLOAK_AUTH_URI:http://localhost:8180/realms/my-bank/protocol/openid-connect/auth}
+            token-uri: ${KEYCLOAK_TOKEN_URI:http://localhost:8180/realms/my-bank/protocol/openid-connect/token}
+            jwk-set-uri: ${KEYCLOAK_JWK_URI:http://localhost:8180/realms/my-bank/protocol/openid-connect/certs}
+            user-info-uri: ${KEYCLOAK_USERINFO_URI:http://localhost:8180/realms/my-bank/protocol/openid-connect/userinfo}
             user-name-attribute: preferred_username
 
 server:
@@ -32,25 +32,18 @@ services:
 
 resilience4j:
   circuitbreaker:
+    configs:
+      default:
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
+        permitted-number-of-calls-in-half-open-state: 3
+        ignoreExceptions:
+          - org.springframework.web.client.HttpClientErrorException
     instances:
       accounts:
-        sliding-window-size: 10
-        failure-rate-threshold: 50
-        wait-duration-in-open-state: 10s
-        permitted-number-of-calls-in-half-open-state: 3
-        ignoreExceptions:
-          - org.springframework.web.client.HttpClientErrorException
+        baseConfig: default
       cash:
-        sliding-window-size: 10
-        failure-rate-threshold: 50
-        wait-duration-in-open-state: 10s
-        permitted-number-of-calls-in-half-open-state: 3
-        ignoreExceptions:
-          - org.springframework.web.client.HttpClientErrorException
+        baseConfig: default
       transfer:
-        sliding-window-size: 10
-        failure-rate-threshold: 50
-        wait-duration-in-open-state: 10s
-        permitted-number-of-calls-in-half-open-state: 3
-        ignoreExceptions:
-          - org.springframework.web.client.HttpClientErrorException
+        baseConfig: default

@@ -1,6 +1,6 @@
 package co.kremnev.front.client;
 
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
@@ -8,6 +8,7 @@ import org.springframework.security.oauth2.client.web.client.OAuth2ClientHttpReq
 import org.springframework.web.client.RestClient;
 
 @Configuration
+@EnableConfigurationProperties(ServiceUrlProperties.class)
 public class RestClientConfig {
 
     private RestClient buildRestClient(String baseUrl, OAuth2AuthorizedClientManager authorizedClientManager) {
@@ -20,23 +21,17 @@ public class RestClientConfig {
     }
 
     @Bean
-    public RestClient accountsRestClient(
-            @Value("${services.accounts.url:http://localhost:8082}") String url,
-            OAuth2AuthorizedClientManager authorizedClientManager) {
-        return buildRestClient(url, authorizedClientManager);
+    public RestClient accountsRestClient(ServiceUrlProperties props, OAuth2AuthorizedClientManager mgr) {
+        return buildRestClient(props.accounts().url(), mgr);
     }
 
     @Bean
-    public RestClient cashRestClient(
-            @Value("${services.cash.url:http://localhost:8083}") String url,
-            OAuth2AuthorizedClientManager authorizedClientManager) {
-        return buildRestClient(url, authorizedClientManager);
+    public RestClient cashRestClient(ServiceUrlProperties props, OAuth2AuthorizedClientManager mgr) {
+        return buildRestClient(props.cash().url(), mgr);
     }
 
     @Bean
-    public RestClient transferRestClient(
-            @Value("${services.transfer.url:http://localhost:8084}") String url,
-            OAuth2AuthorizedClientManager authorizedClientManager) {
-        return buildRestClient(url, authorizedClientManager);
+    public RestClient transferRestClient(ServiceUrlProperties props, OAuth2AuthorizedClientManager mgr) {
+        return buildRestClient(props.transfer().url(), mgr);
     }
 }

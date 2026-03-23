@@ -1,0 +1,7 @@
+fullnameOverride: transfer-service
+image:
+  repository: my-bank/transfer-service
+  tag: latest
+containerPort: 8084
+env: {}
+secrets: {}
