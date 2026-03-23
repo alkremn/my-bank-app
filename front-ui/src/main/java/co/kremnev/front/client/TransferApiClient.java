@@ -12,14 +12,14 @@ public class TransferApiClient {
 
     private final RestClient restClient;
 
-    public TransferApiClient(RestClient gatewayRestClient) {
-        this.restClient = gatewayRestClient;
+    public TransferApiClient(RestClient transferRestClient) {
+        this.restClient = transferRestClient;
     }
 
-    @CircuitBreaker(name = "gateway", fallbackMethod = "transferFallback")
+    @CircuitBreaker(name = "transfer", fallbackMethod = "transferFallback")
     public void transfer(String toLogin, BigDecimal amount) {
         restClient.post()
-                .uri("/api/transfers")
+                .uri("/transfers")
                 .body(new TransferRequestDto(toLogin, amount))
                 .retrieve()
                 .toBodilessEntity();

@@ -1,0 +1,7 @@
+fullnameOverride: notification-service
+image:
+  repository: my-bank/notification-service
+  tag: latest
+containerPort: 8085
+env: {}
+secrets: {}

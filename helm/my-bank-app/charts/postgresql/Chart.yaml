@@ -1,0 +1,4 @@
+apiVersion: v2
+name: postgresql
+description: PostgreSQL StatefulSet for My Bank App
+version: 1.0.0

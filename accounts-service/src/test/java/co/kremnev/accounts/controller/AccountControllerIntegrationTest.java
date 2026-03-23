@@ -23,11 +23,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest(properties = {
-        "spring.cloud.zookeeper.enabled=false",
-        "spring.cloud.zookeeper.discovery.enabled=false",
-        "spring.cloud.zookeeper.config.enabled=false"
-})
+@SpringBootTest
 @Testcontainers
 @AutoConfigureMockMvc
 class AccountControllerIntegrationTest {

@@ -1,0 +1,21 @@
+apiVersion: v2
+name: my-bank-app
+description: My Bank App — Spring Boot microservices on Kubernetes
+version: 1.0.0
+appVersion: "1.0.0"
+
+dependencies:
+  - name: postgresql
+    version: 1.0.0
+  - name: keycloak
+    version: 1.0.0
+  - name: accounts-service
+    version: 1.0.0
+  - name: cash-service
+    version: 1.0.0
+  - name: transfer-service
+    version: 1.0.0
+  - name: notification-service
+    version: 1.0.0
+  - name: front-ui
+    version: 1.0.0
