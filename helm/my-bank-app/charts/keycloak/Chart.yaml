@@ -1,0 +1,4 @@
+apiVersion: v2
+name: keycloak
+description: Keycloak OAuth2 provider for My Bank App
+version: 1.0.0

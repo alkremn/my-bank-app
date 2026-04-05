@@ -1,5 +1,6 @@
 package co.kremnev.transfer.service;
 
+import co.kremnev.starter.NotificationClient;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,7 @@ import java.util.Map;
 public class TransferService {
 
     private final RestClient.Builder restClientBuilder;
+    private final NotificationClient notificationClient;
 
     @CircuitBreaker(name = "transfer-service", fallbackMethod = "transferFallback")
     public void transfer(String fromLogin, String toLogin, BigDecimal amount) {
@@ -23,17 +25,8 @@ public class TransferService {
                 .retrieve()
                 .toBodilessEntity();
 
-        notify(fromLogin, "Transfer sent: -" + amount + " to " + toLogin);
-        notify(toLogin, "Transfer received: +" + amount + " from " + fromLogin);
-    }
-
-    private void notify(String login, String message) {
-        restClientBuilder.build()
-                .post()
-                .uri("http://notification-service/notifications")
-                .body(Map.of("login", login, "message", message))
-                .retrieve()
-                .toBodilessEntity();
+        notificationClient.send(fromLogin, "Transfer sent: -" + amount + " to " + toLogin);
+        notificationClient.send(toLogin, "Transfer received: +" + amount + " from " + fromLogin);
     }
 
     private void transferFallback(String fromLogin, String toLogin, BigDecimal amount, Throwable t) {

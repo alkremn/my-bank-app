@@ -1,0 +1,7 @@
+fullnameOverride: front-ui
+image:
+  repository: my-bank/front-ui
+  tag: latest
+containerPort: 8080
+env: {}
+secrets: {}

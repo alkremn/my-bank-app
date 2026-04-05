@@ -5,7 +5,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.oauth2.client.AuthorizedClientServiceOAuth2AuthorizedClientManager;
@@ -17,10 +16,7 @@ import org.springframework.security.oauth2.client.web.client.OAuth2ClientHttpReq
 import org.springframework.web.client.RestClient;
 
 @AutoConfiguration(beforeName = "org.springframework.boot.autoconfigure.web.client.RestClientAutoConfiguration")
-@ConditionalOnClass(name = {
-        "org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager",
-        "org.springframework.cloud.client.loadbalancer.LoadBalanced"
-})
+@ConditionalOnClass(name = "org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager")
 @ConditionalOnProperty(prefix = "my-bank.oauth2-client", name = "registration-id")
 @EnableConfigurationProperties(MyBankRestClientProperties.class)
 public class ServiceRestClientAutoConfiguration {
@@ -38,7 +34,6 @@ public class ServiceRestClientAutoConfiguration {
     }
 
     @Bean
-    @LoadBalanced
     public RestClient.Builder restClientBuilder(OAuth2AuthorizedClientManager authorizedClientManager,
                                                 MyBankRestClientProperties props) {
         var interceptor = new OAuth2ClientHttpRequestInterceptor(authorizedClientManager);

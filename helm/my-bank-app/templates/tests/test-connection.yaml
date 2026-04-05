@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ .Release.Name }}-test-connection
+  annotations:
+    "helm.sh/hook": test
+spec:
+  restartPolicy: Never
+  containers:
+    - name: test-postgresql
+      image: busybox:1.36
+      command: ['sh', '-c', 'nc -z postgresql 5432']
+    - name: test-keycloak
+      image: busybox:1.36
+      command: ['sh', '-c', 'nc -z keycloak 8180']
+    - name: test-accounts
+      image: busybox:1.36
+      command: ['sh', '-c', 'nc -z accounts-service 80']
+    - name: test-cash
+      image: busybox:1.36
+      command: ['sh', '-c', 'nc -z cash-service 80']
+    - name: test-transfer
+      image: busybox:1.36
+      command: ['sh', '-c', 'nc -z transfer-service 80']
+    - name: test-notification
+      image: busybox:1.36
+      command: ['sh', '-c', 'nc -z notification-service 80']
+    - name: test-front-ui
+      image: busybox:1.36
+      command: ['sh', '-c', 'nc -z front-ui 80']

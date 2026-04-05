@@ -1,0 +1,4 @@
+apiVersion: v2
+name: notification-service
+description: Notification microservice
+version: 1.0.0

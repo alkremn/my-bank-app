@@ -17,30 +17,30 @@ public class AccountApiClient {
 
     private final RestClient restClient;
 
-    public AccountApiClient(RestClient gatewayRestClient) {
-        this.restClient = gatewayRestClient;
+    public AccountApiClient(RestClient accountsRestClient) {
+        this.restClient = accountsRestClient;
     }
 
-    @CircuitBreaker(name = "gateway", fallbackMethod = "getByLoginFallback")
+    @CircuitBreaker(name = "accounts", fallbackMethod = "getByLoginFallback")
     public AccountResponse getByLogin(String login) {
         return restClient.get()
-                .uri("/api/accounts/{login}", login)
+                .uri("/accounts/{login}", login)
                 .retrieve()
                 .body(AccountResponse.class);
     }
 
-    @CircuitBreaker(name = "gateway", fallbackMethod = "getAllFallback")
+    @CircuitBreaker(name = "accounts", fallbackMethod = "getAllFallback")
     public List<AccountResponse> getAll() {
         return restClient.get()
-                .uri("/api/accounts")
+                .uri("/accounts")
                 .retrieve()
                 .body(ACCOUNT_LIST_TYPE);
     }
 
-    @CircuitBreaker(name = "gateway", fallbackMethod = "updateFallback")
+    @CircuitBreaker(name = "accounts", fallbackMethod = "updateFallback")
     public AccountResponse update(String login, String name, java.time.LocalDate birthdate) {
         return restClient.put()
-                .uri("/api/accounts/{login}", login)
+                .uri("/accounts/{login}", login)
                 .body(new AccountUpdateRequest(login, name, birthdate))
                 .retrieve()
                 .body(AccountResponse.class);

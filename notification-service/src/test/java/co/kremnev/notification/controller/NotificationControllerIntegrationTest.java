@@ -22,12 +22,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest(properties = {
-        "spring.cloud.zookeeper.enabled=false",
-        "spring.cloud.zookeeper.discovery.enabled=false",
-        "spring.cloud.zookeeper.config.enabled=false",
-        "spring.config.import="
-})
+@SpringBootTest
 @Testcontainers
 @AutoConfigureMockMvc
 class NotificationControllerIntegrationTest {

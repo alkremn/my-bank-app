@@ -1,24 +1,15 @@
 spring:
   application:
     name: notification-service
-  cloud:
-    zookeeper:
-      connect-string: localhost:2181
-      discovery:
-        root: /services
-      config:
-        root: /config
   security:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://localhost:8180/realms/my-bank
-  config:
-    import: "optional:zookeeper:"
+          jwk-set-uri: ${KEYCLOAK_JWK_URI:http://localhost:8180/realms/my-bank/protocol/openid-connect/certs}
   datasource:
-    url: jdbc:postgresql://localhost:5432/bankdb?currentSchema=notifications
-    username: bankuser
-    password: bankpass
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/bankdb?currentSchema=notifications}
+    username: ${DB_USERNAME:bankuser}
+    password: ${DB_PASSWORD:bankpass}
   jpa:
     hibernate:
       ddl-auto: update

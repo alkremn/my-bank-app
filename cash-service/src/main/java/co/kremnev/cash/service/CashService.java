@@ -1,5 +1,6 @@
 package co.kremnev.cash.service;
 
+import co.kremnev.starter.NotificationClient;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -13,17 +14,18 @@ import java.util.Map;
 public class CashService {
 
     private final RestClient.Builder restClientBuilder;
+    private final NotificationClient notificationClient;
 
     @CircuitBreaker(name = "cash-service", fallbackMethod = "depositFallback")
     public void deposit(String login, BigDecimal amount) {
         updateBalance(login, amount);
-        notify(login, "Deposit: +" + amount);
+        notificationClient.send(login, "Deposit: +" + amount);
     }
 
     @CircuitBreaker(name = "cash-service", fallbackMethod = "withdrawFallback")
     public void withdraw(String login, BigDecimal amount) {
         updateBalance(login, amount.negate());
-        notify(login, "Withdrawal: -" + amount);
+        notificationClient.send(login, "Withdrawal: -" + amount);
     }
 
     private void updateBalance(String login, BigDecimal amount) {
@@ -31,15 +33,6 @@ public class CashService {
                 .post()
                 .uri("http://accounts-service/accounts/{login}/balance", login)
                 .body(Map.of("amount", amount))
-                .retrieve()
-                .toBodilessEntity();
-    }
-
-    private void notify(String login, String message) {
-        restClientBuilder.build()
-                .post()
-                .uri("http://notification-service/notifications")
-                .body(Map.of("login", login, "message", message))
                 .retrieve()
                 .toBodilessEntity();
     }

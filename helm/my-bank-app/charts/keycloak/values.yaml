@@ -1,0 +1,13 @@
+fullnameOverride: keycloak
+image:
+  repository: quay.io/keycloak/keycloak
+  tag: "26.2"
+service:
+  nodePort: 30180
+db:
+  url: jdbc:postgresql://postgresql:5432/bankdb
+  username: bankuser
+  password: bankpass
+  schema: keycloak
+hostname: localhost
+hostnamePort: 30180

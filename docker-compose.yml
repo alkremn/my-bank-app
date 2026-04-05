@@ -10,20 +10,6 @@ services:
       - postgres-data:/var/lib/postgresql/data
       - ./docker/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
 
-  zookeeper:
-    image: zookeeper:3.9
-    container_name: my-bank-zookeeper
-
-  zk-init:
-    image: zookeeper:3.9
-    container_name: my-bank-zk-init
-    volumes:
-      - ./docker/init-zk.sh:/init-zk.sh
-    entrypoint: /bin/bash
-    command: /init-zk.sh
-    depends_on:
-      - zookeeper
-
   keycloak:
     image: quay.io/keycloak/keycloak:26.2
     container_name: my-bank-keycloak
@@ -45,54 +31,54 @@ services:
       - postgres
 
   accounts-service:
+    image: my-bank/accounts-service:latest
     build:
       context: .
       dockerfile: accounts-service/Dockerfile
     container_name: my-bank-accounts
     environment:
-      SPRING_CLOUD_ZOOKEEPER_CONNECT_STRING: zookeeper:2181
-      SPRING_CLOUD_ZOOKEEPER_DISCOVERY_INSTANCE_HOST: accounts-service
+      DB_URL: jdbc:postgresql://postgres:5432/bankdb?currentSchema=accounts
+      DB_USERNAME: bankuser
+      DB_PASSWORD: bankpass
+      KEYCLOAK_JWK_URI: http://keycloak:8180/realms/my-bank/protocol/openid-connect/certs
+      KEYCLOAK_TOKEN_URI: http://keycloak:8180/realms/my-bank/protocol/openid-connect/token
+      OAUTH2_CLIENT_ID: accounts-service-client
+      OAUTH2_CLIENT_SECRET: accounts-secret
     depends_on:
       postgres:
         condition: service_started
-      zookeeper:
-        condition: service_started
-      zk-init:
-        condition: service_completed_successfully
       keycloak:
         condition: service_started
 
   notification-service:
+    image: my-bank/notification-service:latest
     build:
       context: .
       dockerfile: notification-service/Dockerfile
     container_name: my-bank-notifications
     environment:
-      SPRING_CLOUD_ZOOKEEPER_CONNECT_STRING: zookeeper:2181
-      SPRING_CLOUD_ZOOKEEPER_DISCOVERY_INSTANCE_HOST: notification-service
+      DB_URL: jdbc:postgresql://postgres:5432/bankdb?currentSchema=notifications
+      DB_USERNAME: bankuser
+      DB_PASSWORD: bankpass
+      KEYCLOAK_JWK_URI: http://keycloak:8180/realms/my-bank/protocol/openid-connect/certs
     depends_on:
       postgres:
         condition: service_started
-      zookeeper:
-        condition: service_started
-      zk-init:
-        condition: service_completed_successfully
       keycloak:
         condition: service_started
 
   cash-service:
+    image: my-bank/cash-service:latest
     build:
       context: .
       dockerfile: cash-service/Dockerfile
     container_name: my-bank-cash
     environment:
-      SPRING_CLOUD_ZOOKEEPER_CONNECT_STRING: zookeeper:2181
-      SPRING_CLOUD_ZOOKEEPER_DISCOVERY_INSTANCE_HOST: cash-service
+      KEYCLOAK_JWK_URI: http://keycloak:8180/realms/my-bank/protocol/openid-connect/certs
+      KEYCLOAK_TOKEN_URI: http://keycloak:8180/realms/my-bank/protocol/openid-connect/token
+      OAUTH2_CLIENT_ID: cash-service-client
+      OAUTH2_CLIENT_SECRET: cash-secret
     depends_on:
-      zookeeper:
-        condition: service_started
-      zk-init:
-        condition: service_completed_successfully
       accounts-service:
         condition: service_started
       notification-service:
@@ -101,18 +87,17 @@ services:
         condition: service_started
 
   transfer-service:
+    image: my-bank/transfer-service:latest
     build:
       context: .
       dockerfile: transfer-service/Dockerfile
     container_name: my-bank-transfer
     environment:
-      SPRING_CLOUD_ZOOKEEPER_CONNECT_STRING: zookeeper:2181
-      SPRING_CLOUD_ZOOKEEPER_DISCOVERY_INSTANCE_HOST: transfer-service
+      KEYCLOAK_JWK_URI: http://keycloak:8180/realms/my-bank/protocol/openid-connect/certs
+      KEYCLOAK_TOKEN_URI: http://keycloak:8180/realms/my-bank/protocol/openid-connect/token
+      OAUTH2_CLIENT_ID: transfer-service-client
+      OAUTH2_CLIENT_SECRET: transfer-secret
     depends_on:
-      zookeeper:
-        condition: service_started
-      zk-init:
-        condition: service_completed_successfully
       accounts-service:
         condition: service_started
       notification-service:
@@ -120,25 +105,8 @@ services:
       keycloak:
         condition: service_started
 
-  gateway-service:
-    build:
-      context: .
-      dockerfile: gateway-service/Dockerfile
-    container_name: my-bank-gateway
-    environment:
-      SPRING_CLOUD_ZOOKEEPER_CONNECT_STRING: zookeeper:2181
-      SPRING_CLOUD_ZOOKEEPER_DISCOVERY_INSTANCE_HOST: gateway-service
-    depends_on:
-      zookeeper:
-        condition: service_started
-      accounts-service:
-        condition: service_started
-      cash-service:
-        condition: service_started
-      transfer-service:
-        condition: service_started
-
   front-ui:
+    image: my-bank/front-ui:latest
     build:
       context: .
       dockerfile: front-ui/Dockerfile
@@ -146,13 +114,19 @@ services:
     ports:
       - "8080:8080"
     environment:
-      SPRING_CLOUD_ZOOKEEPER_CONNECT_STRING: zookeeper:2181
+      ACCOUNTS_SERVICE_URL: http://accounts-service:8082
+      CASH_SERVICE_URL: http://cash-service:8083
+      TRANSFER_SERVICE_URL: http://transfer-service:8084
+      KEYCLOAK_AUTH_URI: http://localhost:8180/realms/my-bank/protocol/openid-connect/auth
+      KEYCLOAK_TOKEN_URI: http://keycloak:8180/realms/my-bank/protocol/openid-connect/token
+      KEYCLOAK_JWK_URI: http://keycloak:8180/realms/my-bank/protocol/openid-connect/certs
+      KEYCLOAK_USERINFO_URI: http://keycloak:8180/realms/my-bank/protocol/openid-connect/userinfo
     depends_on:
-      zookeeper:
+      accounts-service:
         condition: service_started
-      zk-init:
-        condition: service_completed_successfully
-      gateway-service:
+      cash-service:
+        condition: service_started
+      transfer-service:
         condition: service_started
       keycloak:
         condition: service_started

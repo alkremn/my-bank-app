@@ -1,15 +1,6 @@
 spring:
   application:
     name: my-bank-front-app
-  cloud:
-    zookeeper:
-      connect-string: localhost:2181
-      discovery:
-        root: /services
-      config:
-        root: /config
-  config:
-    import: "optional:zookeeper:"
   security:
     oauth2:
       client:
@@ -22,22 +13,37 @@ spring:
             scope: openid,profile,accounts,cash,transfer,notifications
         provider:
           keycloak:
-            authorization-uri: http://localhost:8180/realms/my-bank/protocol/openid-connect/auth
-            token-uri: http://localhost:8180/realms/my-bank/protocol/openid-connect/token
-            jwk-set-uri: http://localhost:8180/realms/my-bank/protocol/openid-connect/certs
-            user-info-uri: http://localhost:8180/realms/my-bank/protocol/openid-connect/userinfo
+            authorization-uri: ${KEYCLOAK_AUTH_URI:http://localhost:8180/realms/my-bank/protocol/openid-connect/auth}
+            token-uri: ${KEYCLOAK_TOKEN_URI:http://localhost:8180/realms/my-bank/protocol/openid-connect/token}
+            jwk-set-uri: ${KEYCLOAK_JWK_URI:http://localhost:8180/realms/my-bank/protocol/openid-connect/certs}
+            user-info-uri: ${KEYCLOAK_USERINFO_URI:http://localhost:8180/realms/my-bank/protocol/openid-connect/userinfo}
             user-name-attribute: preferred_username
 
 server:
   port: 8080
 
+services:
+  accounts:
+    url: ${ACCOUNTS_SERVICE_URL:http://localhost:8082}
+  cash:
+    url: ${CASH_SERVICE_URL:http://localhost:8083}
+  transfer:
+    url: ${TRANSFER_SERVICE_URL:http://localhost:8084}
+
 resilience4j:
   circuitbreaker:
-    instances:
-      gateway:
+    configs:
+      default:
         sliding-window-size: 10
         failure-rate-threshold: 50
         wait-duration-in-open-state: 10s
         permitted-number-of-calls-in-half-open-state: 3
         ignoreExceptions:
           - org.springframework.web.client.HttpClientErrorException
+    instances:
+      accounts:
+        baseConfig: default
+      cash:
+        baseConfig: default
+      transfer:
+        baseConfig: default

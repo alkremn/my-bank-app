@@ -1,6 +1,6 @@
 package co.kremnev.front.client;
 
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
@@ -8,17 +8,30 @@ import org.springframework.security.oauth2.client.web.client.OAuth2ClientHttpReq
 import org.springframework.web.client.RestClient;
 
 @Configuration
+@EnableConfigurationProperties(ServiceUrlProperties.class)
 public class RestClientConfig {
 
-    @Bean
-    public RestClient gatewayRestClient(
-            @Value("${gateway.url:http://localhost:8081}") String gatewayUrl,
-            OAuth2AuthorizedClientManager authorizedClientManager) {
+    private RestClient buildRestClient(String baseUrl, OAuth2AuthorizedClientManager authorizedClientManager) {
         var interceptor = new OAuth2ClientHttpRequestInterceptor(authorizedClientManager);
         interceptor.setClientRegistrationIdResolver(request -> "keycloak");
         return RestClient.builder()
-                .baseUrl(gatewayUrl)
+                .baseUrl(baseUrl)
                 .requestInterceptor(interceptor)
                 .build();
+    }
+
+    @Bean
+    public RestClient accountsRestClient(ServiceUrlProperties props, OAuth2AuthorizedClientManager mgr) {
+        return buildRestClient(props.accounts().url(), mgr);
+    }
+
+    @Bean
+    public RestClient cashRestClient(ServiceUrlProperties props, OAuth2AuthorizedClientManager mgr) {
+        return buildRestClient(props.cash().url(), mgr);
+    }
+
+    @Bean
+    public RestClient transferRestClient(ServiceUrlProperties props, OAuth2AuthorizedClientManager mgr) {
+        return buildRestClient(props.transfer().url(), mgr);
     }
 }

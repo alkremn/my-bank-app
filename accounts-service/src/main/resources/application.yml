@@ -1,34 +1,25 @@
 spring:
   application:
     name: accounts-service
-  cloud:
-    zookeeper:
-      connect-string: localhost:2181
-      discovery:
-        root: /services
-      config:
-        root: /config
   security:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://localhost:8180/realms/my-bank
+          jwk-set-uri: ${KEYCLOAK_JWK_URI:http://localhost:8180/realms/my-bank/protocol/openid-connect/certs}
       client:
         registration:
           accounts-service-client:
-            client-id: accounts-service-client
-            client-secret: accounts-secret
+            client-id: ${OAUTH2_CLIENT_ID:accounts-service-client}
+            client-secret: ${OAUTH2_CLIENT_SECRET:accounts-secret}
             authorization-grant-type: client_credentials
             scope: notifications
         provider:
           accounts-service-client:
-            token-uri: http://localhost:8180/realms/my-bank/protocol/openid-connect/token
-  config:
-    import: "optional:zookeeper:"
+            token-uri: ${KEYCLOAK_TOKEN_URI:http://localhost:8180/realms/my-bank/protocol/openid-connect/token}
   datasource:
-    url: jdbc:postgresql://localhost:5432/bankdb?currentSchema=accounts
-    username: bankuser
-    password: bankpass
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/bankdb?currentSchema=accounts}
+    username: ${DB_USERNAME:bankuser}
+    password: ${DB_PASSWORD:bankpass}
   jpa:
     hibernate:
       ddl-auto: update

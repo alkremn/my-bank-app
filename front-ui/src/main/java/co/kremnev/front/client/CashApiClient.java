@@ -12,23 +12,23 @@ public class CashApiClient {
 
     private final RestClient restClient;
 
-    public CashApiClient(RestClient gatewayRestClient) {
-        this.restClient = gatewayRestClient;
+    public CashApiClient(RestClient cashRestClient) {
+        this.restClient = cashRestClient;
     }
 
-    @CircuitBreaker(name = "gateway", fallbackMethod = "depositFallback")
+    @CircuitBreaker(name = "cash", fallbackMethod = "depositFallback")
     public void deposit(BigDecimal amount) {
         restClient.post()
-                .uri("/api/cash/deposit")
+                .uri("/cash/deposit")
                 .body(new CashRequestDto(amount))
                 .retrieve()
                 .toBodilessEntity();
     }
 
-    @CircuitBreaker(name = "gateway", fallbackMethod = "withdrawFallback")
+    @CircuitBreaker(name = "cash", fallbackMethod = "withdrawFallback")
     public void withdraw(BigDecimal amount) {
         restClient.post()
-                .uri("/api/cash/withdraw")
+                .uri("/cash/withdraw")
                 .body(new CashRequestDto(amount))
                 .retrieve()
                 .toBodilessEntity();

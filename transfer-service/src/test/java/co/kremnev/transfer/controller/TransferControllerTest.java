@@ -1,5 +1,6 @@
 package co.kremnev.transfer.controller;
 
+import co.kremnev.starter.NotificationClient;
 import co.kremnev.transfer.service.TransferService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,14 +19,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest(properties = {
-        "spring.cloud.zookeeper.enabled=false",
-        "spring.cloud.zookeeper.discovery.enabled=false",
-        "spring.cloud.zookeeper.config.enabled=false",
-        "spring.config.import=",
         "spring.security.oauth2.client.registration.transfer-service-client.client-id=test",
         "spring.security.oauth2.client.registration.transfer-service-client.client-secret=test",
         "spring.security.oauth2.client.registration.transfer-service-client.authorization-grant-type=client_credentials",
-        "spring.security.oauth2.client.provider.keycloak.token-uri=http://localhost:0/token"
+        "spring.security.oauth2.client.provider.transfer-service-client.token-uri=http://localhost:0/token"
 })
 @AutoConfigureMockMvc
 class TransferControllerTest {
@@ -37,7 +34,10 @@ class TransferControllerTest {
     private TransferService transferService;
 
     @MockitoBean
-    private RestClient.Builder loadBalancedRestClientBuilder;
+    private RestClient.Builder restClientBuilder;
+
+    @MockitoBean
+    private NotificationClient notificationClient;
 
     @Test
     void transfer_withValidJwt_returns200() throws Exception {
