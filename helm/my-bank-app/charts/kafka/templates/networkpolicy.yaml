@@ -9,22 +9,27 @@ spec:
   policyTypes:
     - Ingress
     - Egress
-  ingress: []
-  egress:
-    - to:
+  ingress:
+    - from:
         - podSelector:
             matchLabels:
-              app: kafka
+              app: accounts-service
+        - podSelector:
+            matchLabels:
+              app: cash-service
+        - podSelector:
+            matchLabels:
+              app: transfer-service
+        - podSelector:
+            matchLabels:
+              app: notification-service
+        - podSelector:
+            matchLabels:
+              app: kafka-topic-init
       ports:
         - protocol: TCP
           port: 9092
-    - to:
-        - podSelector:
-            matchLabels:
-              app: postgresql
-      ports:
-        - protocol: TCP
-          port: 5432
+  egress:
     - to:
         - namespaceSelector: {}
       ports:

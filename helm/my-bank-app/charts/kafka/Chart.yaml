@@ -1,0 +1,4 @@
+apiVersion: v2
+name: kafka
+description: Apache Kafka in KRaft mode for My Bank App
+version: 1.0.0
