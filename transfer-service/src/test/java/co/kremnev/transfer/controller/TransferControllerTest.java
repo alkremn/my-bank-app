@@ -1,5 +1,6 @@
 package co.kremnev.transfer.controller;
 
+import co.kremnev.starter.NotificationClient;
 import co.kremnev.transfer.service.TransferService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +35,9 @@ class TransferControllerTest {
 
     @MockitoBean
     private RestClient.Builder restClientBuilder;
+
+    @MockitoBean
+    private NotificationClient notificationClient;
 
     @Test
     void transfer_withValidJwt_returns200() throws Exception {

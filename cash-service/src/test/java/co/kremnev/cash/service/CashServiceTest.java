@@ -1,5 +1,6 @@
 package co.kremnev.cash.service;
 
+import co.kremnev.starter.NotificationClient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,24 +18,29 @@ class CashServiceTest {
     @Mock(answer = org.mockito.Answers.RETURNS_DEEP_STUBS)
     private RestClient.Builder restClientBuilder;
 
+    @Mock
+    private NotificationClient notificationClient;
+
     private CashService cashService;
 
     @BeforeEach
     void setUp() {
-        cashService = new CashService(restClientBuilder);
+        cashService = new CashService(restClientBuilder, notificationClient);
     }
 
     @Test
-    void deposit_callsTwoEndpoints() {
+    void deposit_callsAccountsAndNotification() {
         cashService.deposit("ivanov", BigDecimal.valueOf(500));
 
-        verify(restClientBuilder, times(2)).build();
+        verify(restClientBuilder).build();
+        verify(notificationClient).send(eq("ivanov"), anyString());
     }
 
     @Test
-    void withdraw_callsTwoEndpoints() {
+    void withdraw_callsAccountsAndNotification() {
         cashService.withdraw("ivanov", BigDecimal.valueOf(200));
 
-        verify(restClientBuilder, times(2)).build();
+        verify(restClientBuilder).build();
+        verify(notificationClient).send(eq("ivanov"), anyString());
     }
 }

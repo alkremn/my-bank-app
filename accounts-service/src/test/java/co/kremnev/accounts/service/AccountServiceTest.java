@@ -3,12 +3,12 @@ package co.kremnev.accounts.service;
 import co.kremnev.accounts.controller.dto.AccountDto;
 import co.kremnev.accounts.model.Account;
 import co.kremnev.accounts.repository.AccountRepository;
+import co.kremnev.starter.NotificationClient;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.web.client.RestClient;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -25,8 +25,8 @@ class AccountServiceTest {
     @Mock
     private AccountRepository accountRepository;
 
-    @Mock(answer = org.mockito.Answers.RETURNS_DEEP_STUBS)
-    private RestClient.Builder restClientBuilder;
+    @Mock
+    private NotificationClient notificationClient;
 
     @InjectMocks
     private AccountService accountService;
