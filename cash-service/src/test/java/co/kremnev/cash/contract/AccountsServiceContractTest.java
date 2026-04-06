@@ -1,10 +1,12 @@
 package co.kremnev.cash.contract;
 
+import co.kremnev.starter.KafkaNotificationProducer;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.contract.stubrunner.spring.AutoConfigureStubRunner;
 import org.springframework.cloud.contract.stubrunner.spring.StubRunnerProperties;
 import org.springframework.cloud.contract.stubrunner.spring.StubRunnerPort;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.web.client.RestClient;
 
 import org.springframework.http.MediaType;
@@ -27,6 +29,9 @@ import static org.assertj.core.api.Assertions.assertThat;
         stubsMode = StubRunnerProperties.StubsMode.LOCAL
 )
 public class AccountsServiceContractTest {
+
+    @MockitoBean
+    private KafkaNotificationProducer notificationProducer;
 
     @StubRunnerPort("accounts-service")
     private int stubPort;

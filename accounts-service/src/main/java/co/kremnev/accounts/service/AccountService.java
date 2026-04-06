@@ -3,7 +3,7 @@ package co.kremnev.accounts.service;
 import co.kremnev.accounts.controller.dto.AccountDto;
 import co.kremnev.accounts.model.Account;
 import co.kremnev.accounts.repository.AccountRepository;
-import co.kremnev.starter.NotificationClient;
+import co.kremnev.starter.KafkaNotificationProducer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -18,7 +18,7 @@ import java.util.List;
 public class AccountService {
 
     private final AccountRepository accountRepository;
-    private final NotificationClient notificationClient;
+    private final KafkaNotificationProducer notificationProducer;
 
     public Account create(AccountDto dto) {
         var account = new Account(null, dto.getLogin(), dto.getName(), dto.getBirthdate(), BigDecimal.ZERO);
@@ -56,7 +56,7 @@ public class AccountService {
         account.setBalance(newBalance);
         var saved = accountRepository.save(account);
         String action = amount.compareTo(BigDecimal.ZERO) >= 0 ? "пополнение" : "списание";
-        notificationClient.send(login, "Баланс изменён (%s): %s руб".formatted(action, amount));
+        notificationProducer.send(login, "Баланс изменён (%s): %s руб".formatted(action, amount));
         return saved;
     }
 }

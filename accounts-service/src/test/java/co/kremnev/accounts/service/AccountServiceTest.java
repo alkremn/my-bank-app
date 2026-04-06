@@ -3,7 +3,7 @@ package co.kremnev.accounts.service;
 import co.kremnev.accounts.controller.dto.AccountDto;
 import co.kremnev.accounts.model.Account;
 import co.kremnev.accounts.repository.AccountRepository;
-import co.kremnev.starter.NotificationClient;
+import co.kremnev.starter.KafkaNotificationProducer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -26,7 +26,7 @@ class AccountServiceTest {
     private AccountRepository accountRepository;
 
     @Mock
-    private NotificationClient notificationClient;
+    private KafkaNotificationProducer notificationProducer;
 
     @InjectMocks
     private AccountService accountService;
