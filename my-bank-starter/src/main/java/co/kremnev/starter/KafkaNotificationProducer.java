@@ -8,11 +8,12 @@ public class KafkaNotificationProducer {
 
     private static final Logger log = LoggerFactory.getLogger(KafkaNotificationProducer.class);
 
-    private final KafkaTemplate<String, NotificationEvent> kafkaTemplate;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
     private final String topic;
 
-    public KafkaNotificationProducer(KafkaTemplate<String, NotificationEvent> kafkaTemplate, String topic) {
-        this.kafkaTemplate = kafkaTemplate;
+    @SuppressWarnings("unchecked")
+    public KafkaNotificationProducer(KafkaTemplate<String, ?> kafkaTemplate, String topic) {
+        this.kafkaTemplate = (KafkaTemplate<String, Object>) kafkaTemplate;
         this.topic = topic;
     }
 

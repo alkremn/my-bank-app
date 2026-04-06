@@ -14,7 +14,7 @@ public class KafkaNotificationProducerAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public KafkaNotificationProducer kafkaNotificationProducer(
-            KafkaTemplate<String, NotificationEvent> kafkaTemplate,
+            KafkaTemplate<String, ?> kafkaTemplate,
             @Value("${my-bank.notification.topic:notifications}") String topic) {
         return new KafkaNotificationProducer(kafkaTemplate, topic);
     }
