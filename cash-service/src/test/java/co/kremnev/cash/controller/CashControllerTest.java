@@ -1,7 +1,7 @@
 package co.kremnev.cash.controller;
 
 import co.kremnev.cash.service.CashService;
-import co.kremnev.starter.NotificationClient;
+import co.kremnev.starter.KafkaNotificationProducer;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -37,7 +37,7 @@ class CashControllerTest {
     private RestClient.Builder restClientBuilder;
 
     @MockitoBean
-    private NotificationClient notificationClient;
+    private KafkaNotificationProducer notificationProducer;
 
     @Test
     void deposit_withValidJwt_returns200() throws Exception {

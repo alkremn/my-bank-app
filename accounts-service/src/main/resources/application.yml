@@ -6,16 +6,6 @@ spring:
       resourceserver:
         jwt:
           jwk-set-uri: ${KEYCLOAK_JWK_URI:http://localhost:8180/realms/my-bank/protocol/openid-connect/certs}
-      client:
-        registration:
-          accounts-service-client:
-            client-id: ${OAUTH2_CLIENT_ID:accounts-service-client}
-            client-secret: ${OAUTH2_CLIENT_SECRET:accounts-secret}
-            authorization-grant-type: client_credentials
-            scope: notifications
-        provider:
-          accounts-service-client:
-            token-uri: ${KEYCLOAK_TOKEN_URI:http://localhost:8180/realms/my-bank/protocol/openid-connect/token}
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/bankdb?currentSchema=accounts}
     username: ${DB_USERNAME:bankuser}
@@ -26,12 +16,17 @@ spring:
     properties:
       hibernate:
         default_schema: accounts
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all
+      retries: 3
 
 my-bank:
   security:
     scope: accounts
-  oauth2-client:
-    registration-id: accounts-service-client
 
 server:
   port: 8082

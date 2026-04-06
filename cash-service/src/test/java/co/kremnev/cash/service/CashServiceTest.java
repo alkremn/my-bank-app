@@ -1,6 +1,6 @@
 package co.kremnev.cash.service;
 
-import co.kremnev.starter.NotificationClient;
+import co.kremnev.starter.KafkaNotificationProducer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,13 +19,13 @@ class CashServiceTest {
     private RestClient.Builder restClientBuilder;
 
     @Mock
-    private NotificationClient notificationClient;
+    private KafkaNotificationProducer notificationProducer;
 
     private CashService cashService;
 
     @BeforeEach
     void setUp() {
-        cashService = new CashService(restClientBuilder, notificationClient);
+        cashService = new CashService(restClientBuilder, notificationProducer);
     }
 
     @Test
@@ -33,7 +33,7 @@ class CashServiceTest {
         cashService.deposit("ivanov", BigDecimal.valueOf(500));
 
         verify(restClientBuilder).build();
-        verify(notificationClient).send(eq("ivanov"), anyString());
+        verify(notificationProducer).send(eq("ivanov"), anyString());
     }
 
     @Test
@@ -41,6 +41,6 @@ class CashServiceTest {
         cashService.withdraw("ivanov", BigDecimal.valueOf(200));
 
         verify(restClientBuilder).build();
-        verify(notificationClient).send(eq("ivanov"), anyString());
+        verify(notificationProducer).send(eq("ivanov"), anyString());
     }
 }

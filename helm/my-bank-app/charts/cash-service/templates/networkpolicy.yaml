@@ -35,10 +35,10 @@ spec:
     - to:
         - podSelector:
             matchLabels:
-              app: notification-service
+              app: kafka
       ports:
         - protocol: TCP
-          port: 8085
+          port: 9092
     - to:
         - podSelector:
             matchLabels:

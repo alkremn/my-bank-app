@@ -1,6 +1,6 @@
 package co.kremnev.transfer.service;
 
-import co.kremnev.starter.NotificationClient;
+import co.kremnev.starter.KafkaNotificationProducer;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -14,7 +14,7 @@ import java.util.Map;
 public class TransferService {
 
     private final RestClient.Builder restClientBuilder;
-    private final NotificationClient notificationClient;
+    private final KafkaNotificationProducer notificationProducer;
 
     @CircuitBreaker(name = "transfer-service", fallbackMethod = "transferFallback")
     public void transfer(String fromLogin, String toLogin, BigDecimal amount) {
@@ -25,8 +25,8 @@ public class TransferService {
                 .retrieve()
                 .toBodilessEntity();
 
-        notificationClient.send(fromLogin, "Transfer sent: -" + amount + " to " + toLogin);
-        notificationClient.send(toLogin, "Transfer received: +" + amount + " from " + fromLogin);
+        notificationProducer.send(fromLogin, "Transfer sent: -" + amount + " to " + toLogin);
+        notificationProducer.send(toLogin, "Transfer received: +" + amount + " from " + fromLogin);
     }
 
     private void transferFallback(String fromLogin, String toLogin, BigDecimal amount, Throwable t) {

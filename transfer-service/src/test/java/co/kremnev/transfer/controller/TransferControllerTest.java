@@ -1,6 +1,6 @@
 package co.kremnev.transfer.controller;
 
-import co.kremnev.starter.NotificationClient;
+import co.kremnev.starter.KafkaNotificationProducer;
 import co.kremnev.transfer.service.TransferService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +37,7 @@ class TransferControllerTest {
     private RestClient.Builder restClientBuilder;
 
     @MockitoBean
-    private NotificationClient notificationClient;
+    private KafkaNotificationProducer notificationProducer;
 
     @Test
     void transfer_withValidJwt_returns200() throws Exception {

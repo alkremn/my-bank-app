@@ -10,7 +10,7 @@ spring:
             client-secret: front-ui-secret
             authorization-grant-type: authorization_code
             redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
-            scope: openid,profile,accounts,cash,transfer,notifications
+            scope: openid,profile,accounts,cash,transfer
         provider:
           keycloak:
             authorization-uri: ${KEYCLOAK_AUTH_URI:http://localhost:8180/realms/my-bank/protocol/openid-connect/auth}
