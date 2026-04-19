@@ -1,6 +1,8 @@
 spring:
   application:
     name: notification-service
+  main:
+    web-application-type: servlet
   autoconfigure:
     exclude:
       - co.kremnev.starter.KafkaNotificationProducerAutoConfiguration
@@ -26,3 +28,27 @@ spring:
     properties:
       hibernate:
         default_schema: notifications
+
+server:
+  port: -1
+
+management:
+  server:
+    port: 8085
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  endpoint:
+    health:
+      show-details: always
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: ${ZIPKIN_URL:http://localhost:9411/api/v2/spans}
+  prometheus:
+    metrics:
+      export:
+        enabled: true
