@@ -2,8 +2,9 @@ package co.kremnev.accounts.service;
 
 import co.kremnev.accounts.controller.dto.AccountDto;
 import co.kremnev.accounts.model.Account;
+import co.kremnev.accounts.model.OutboxEvent;
 import co.kremnev.accounts.repository.AccountRepository;
-import co.kremnev.starter.KafkaNotificationProducer;
+import co.kremnev.accounts.repository.OutboxRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -11,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.List;
 
 @Service
@@ -18,7 +20,7 @@ import java.util.List;
 public class AccountService {
 
     private final AccountRepository accountRepository;
-    private final KafkaNotificationProducer notificationProducer;
+    private final OutboxRepository outboxRepository;
 
     public Account create(AccountDto dto) {
         var account = new Account(null, dto.getLogin(), dto.getName(), dto.getBirthdate(), BigDecimal.ZERO);
@@ -47,6 +49,7 @@ public class AccountService {
         updateBalance(toLogin, amount);
     }
 
+    @Transactional
     public Account updateBalance(String login, BigDecimal amount) {
         var account = getByLogin(login);
         var newBalance = account.getBalance().add(amount);
@@ -56,7 +59,8 @@ public class AccountService {
         account.setBalance(newBalance);
         var saved = accountRepository.save(account);
         String action = amount.compareTo(BigDecimal.ZERO) >= 0 ? "пополнение" : "списание";
-        notificationProducer.send(login, "Баланс изменён (%s): %s руб".formatted(action, amount));
+        outboxRepository.save(new OutboxEvent(null, login,
+                "Баланс изменён (%s): %s руб".formatted(action, amount), Instant.now(), false));
         return saved;
     }
 }
