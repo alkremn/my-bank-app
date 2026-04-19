@@ -2,6 +2,7 @@ package co.kremnev.accounts.controller;
 
 import co.kremnev.accounts.model.Account;
 import co.kremnev.accounts.repository.AccountRepository;
+import co.kremnev.starter.KafkaNotificationProducer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +10,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -39,6 +41,9 @@ class AccountControllerIntegrationTest {
 
     @Autowired
     private AccountRepository accountRepository;
+
+    @MockitoBean
+    private KafkaNotificationProducer notificationProducer;
 
     @BeforeEach
     void setUp() {

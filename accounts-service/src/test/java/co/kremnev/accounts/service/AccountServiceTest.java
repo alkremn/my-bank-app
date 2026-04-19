@@ -2,8 +2,9 @@ package co.kremnev.accounts.service;
 
 import co.kremnev.accounts.controller.dto.AccountDto;
 import co.kremnev.accounts.model.Account;
+import co.kremnev.accounts.model.OutboxEvent;
 import co.kremnev.accounts.repository.AccountRepository;
-import co.kremnev.starter.NotificationClient;
+import co.kremnev.accounts.repository.OutboxRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -26,7 +27,7 @@ class AccountServiceTest {
     private AccountRepository accountRepository;
 
     @Mock
-    private NotificationClient notificationClient;
+    private OutboxRepository outboxRepository;
 
     @InjectMocks
     private AccountService accountService;
@@ -103,10 +104,12 @@ class AccountServiceTest {
         var account = new Account(1L, "ivanov", "Ivan", LocalDate.of(1990, 1, 1), BigDecimal.valueOf(1000));
         when(accountRepository.findByLogin("ivanov")).thenReturn(Optional.of(account));
         when(accountRepository.save(any(Account.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(outboxRepository.save(any(OutboxEvent.class))).thenAnswer(inv -> inv.getArgument(0));
 
         var result = accountService.updateBalance("ivanov", BigDecimal.valueOf(500));
 
         assertEquals(0, BigDecimal.valueOf(1500).compareTo(result.getBalance()));
+        verify(outboxRepository).save(any(OutboxEvent.class));
     }
 
     @Test
@@ -127,12 +130,14 @@ class AccountServiceTest {
         when(accountRepository.findByLogin("ivanov")).thenReturn(Optional.of(sender));
         when(accountRepository.findByLogin("petrov")).thenReturn(Optional.of(receiver));
         when(accountRepository.save(any(Account.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(outboxRepository.save(any(OutboxEvent.class))).thenAnswer(inv -> inv.getArgument(0));
 
         accountService.transfer("ivanov", "petrov", BigDecimal.valueOf(300));
 
         assertEquals(0, BigDecimal.valueOf(700).compareTo(sender.getBalance()));
         assertEquals(0, BigDecimal.valueOf(800).compareTo(receiver.getBalance()));
         verify(accountRepository, times(2)).save(any(Account.class));
+        verify(outboxRepository, times(2)).save(any(OutboxEvent.class));
     }
 
     @Test

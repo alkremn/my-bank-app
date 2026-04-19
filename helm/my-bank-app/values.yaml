@@ -25,6 +25,9 @@ keycloak:
   hostname: localhost
   hostnamePort: 30180
 
+kafka:
+  fullnameOverride: kafka
+
 accounts-service:
   fullnameOverride: accounts-service
   image:
@@ -35,11 +38,9 @@ accounts-service:
     DB_URL: jdbc:postgresql://postgresql:5432/bankdb?currentSchema=accounts
     DB_USERNAME: bankuser
     KEYCLOAK_JWK_URI: http://keycloak:8180/realms/my-bank/protocol/openid-connect/certs
-    KEYCLOAK_TOKEN_URI: http://keycloak:8180/realms/my-bank/protocol/openid-connect/token
-    OAUTH2_CLIENT_ID: accounts-service-client
+    KAFKA_BOOTSTRAP_SERVERS: kafka:9092
   secrets:
     DB_PASSWORD: bankpass
-    OAUTH2_CLIENT_SECRET: accounts-secret
 
 cash-service:
   fullnameOverride: cash-service
@@ -51,6 +52,7 @@ cash-service:
     KEYCLOAK_JWK_URI: http://keycloak:8180/realms/my-bank/protocol/openid-connect/certs
     KEYCLOAK_TOKEN_URI: http://keycloak:8180/realms/my-bank/protocol/openid-connect/token
     OAUTH2_CLIENT_ID: cash-service-client
+    KAFKA_BOOTSTRAP_SERVERS: kafka:9092
   secrets:
     OAUTH2_CLIENT_SECRET: cash-secret
 
@@ -64,6 +66,7 @@ transfer-service:
     KEYCLOAK_JWK_URI: http://keycloak:8180/realms/my-bank/protocol/openid-connect/certs
     KEYCLOAK_TOKEN_URI: http://keycloak:8180/realms/my-bank/protocol/openid-connect/token
     OAUTH2_CLIENT_ID: transfer-service-client
+    KAFKA_BOOTSTRAP_SERVERS: kafka:9092
   secrets:
     OAUTH2_CLIENT_SECRET: transfer-secret
 
@@ -76,7 +79,7 @@ notification-service:
   env:
     DB_URL: jdbc:postgresql://postgresql:5432/bankdb?currentSchema=notifications
     DB_USERNAME: bankuser
-    KEYCLOAK_JWK_URI: http://keycloak:8180/realms/my-bank/protocol/openid-connect/certs
+    KAFKA_BOOTSTRAP_SERVERS: kafka:9092
   secrets:
     DB_PASSWORD: bankpass
 

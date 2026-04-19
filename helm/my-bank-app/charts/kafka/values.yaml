@@ -1,0 +1,7 @@
+fullnameOverride: kafka
+image:
+  repository: apache/kafka
+  tag: "3.9.0"
+containerPort: 9092
+storage:
+  size: 1Gi

@@ -1,6 +1,6 @@
 package co.kremnev.cash.service;
 
-import co.kremnev.starter.NotificationClient;
+import co.kremnev.starter.KafkaNotificationProducer;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -14,18 +14,18 @@ import java.util.Map;
 public class CashService {
 
     private final RestClient.Builder restClientBuilder;
-    private final NotificationClient notificationClient;
+    private final KafkaNotificationProducer notificationProducer;
 
     @CircuitBreaker(name = "cash-service", fallbackMethod = "depositFallback")
     public void deposit(String login, BigDecimal amount) {
         updateBalance(login, amount);
-        notificationClient.send(login, "Deposit: +" + amount);
+        notificationProducer.send(login, "Deposit: +" + amount);
     }
 
     @CircuitBreaker(name = "cash-service", fallbackMethod = "withdrawFallback")
     public void withdraw(String login, BigDecimal amount) {
         updateBalance(login, amount.negate());
-        notificationClient.send(login, "Withdrawal: -" + amount);
+        notificationProducer.send(login, "Withdrawal: -" + amount);
     }
 
     private void updateBalance(String login, BigDecimal amount) {

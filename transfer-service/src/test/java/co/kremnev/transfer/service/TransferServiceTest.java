@@ -1,6 +1,6 @@
 package co.kremnev.transfer.service;
 
-import co.kremnev.starter.NotificationClient;
+import co.kremnev.starter.KafkaNotificationProducer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,13 +19,13 @@ class TransferServiceTest {
     private RestClient.Builder restClientBuilder;
 
     @Mock
-    private NotificationClient notificationClient;
+    private KafkaNotificationProducer notificationProducer;
 
     private TransferService transferService;
 
     @BeforeEach
     void setUp() {
-        transferService = new TransferService(restClientBuilder, notificationClient);
+        transferService = new TransferService(restClientBuilder, notificationProducer);
     }
 
     @Test
@@ -33,7 +33,7 @@ class TransferServiceTest {
         transferService.transfer("ivanov", "petrov", BigDecimal.valueOf(300));
 
         verify(restClientBuilder).build();
-        verify(notificationClient).send(eq("ivanov"), anyString());
-        verify(notificationClient).send(eq("petrov"), anyString());
+        verify(notificationProducer).send(eq("ivanov"), anyString());
+        verify(notificationProducer).send(eq("petrov"), anyString());
     }
 }

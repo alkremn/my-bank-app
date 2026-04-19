@@ -1,11 +1,21 @@
 spring:
   application:
     name: notification-service
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          jwk-set-uri: ${KEYCLOAK_JWK_URI:http://localhost:8180/realms/my-bank/protocol/openid-connect/certs}
+  autoconfigure:
+    exclude:
+      - co.kremnev.starter.KafkaNotificationProducerAutoConfiguration
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    consumer:
+      group-id: notification-service
+      auto-offset-reset: earliest
+      enable-auto-commit: false
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: co.kremnev.starter
+    listener:
+      ack-mode: manual
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/bankdb?currentSchema=notifications}
     username: ${DB_USERNAME:bankuser}
@@ -16,10 +26,3 @@ spring:
     properties:
       hibernate:
         default_schema: notifications
-
-my-bank:
-  security:
-    scope: notifications
-
-server:
-  port: 8085
