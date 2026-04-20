@@ -1,0 +1,8 @@
+fullnameOverride: grafana
+image:
+  repository: grafana/grafana
+  tag: "11.6.0"
+containerPort: 3000
+service:
+  nodePort: 30300
+adminPassword: admin

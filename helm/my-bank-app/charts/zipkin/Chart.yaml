@@ -1,0 +1,4 @@
+apiVersion: v2
+name: zipkin
+description: Zipkin distributed tracing for My Bank App
+version: 1.0.0

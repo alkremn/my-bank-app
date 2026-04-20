@@ -13,39 +13,30 @@ spec:
     - from:
         - podSelector:
             matchLabels:
-              app: prometheus
+              app: grafana
       ports:
         - protocol: TCP
-          port: 8085
+          port: 9090
   egress:
     - to:
         - podSelector:
             matchLabels:
-              app: kafka
-      ports:
-        - protocol: TCP
-          port: 9092
-    - to:
+              app: accounts-service
         - podSelector:
             matchLabels:
-              app: postgresql
-      ports:
-        - protocol: TCP
-          port: 5432
-    - to:
+              app: cash-service
         - podSelector:
             matchLabels:
-              app: zipkin
-      ports:
-        - protocol: TCP
-          port: 9411
-    - to:
+              app: transfer-service
         - podSelector:
             matchLabels:
-              app: logstash
+              app: notification-service
+        - podSelector:
+            matchLabels:
+              app: front-ui
       ports:
         - protocol: TCP
-          port: 5044
+          port: 80
     - to:
         - namespaceSelector: {}
       ports:

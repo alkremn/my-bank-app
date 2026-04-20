@@ -1,0 +1,7 @@
+fullnameOverride: prometheus
+image:
+  repository: prom/prometheus
+  tag: "v3.3.0"
+containerPort: 9090
+storage:
+  size: 2Gi

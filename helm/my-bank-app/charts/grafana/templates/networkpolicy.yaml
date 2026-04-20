@@ -11,27 +11,20 @@ spec:
     - Egress
   ingress:
     - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 3000
+  egress:
+    - to:
         - podSelector:
             matchLabels:
               app: prometheus
       ports:
         - protocol: TCP
-          port: 8085
-  egress:
-    - to:
-        - podSelector:
-            matchLabels:
-              app: kafka
-      ports:
-        - protocol: TCP
-          port: 9092
-    - to:
-        - podSelector:
-            matchLabels:
-              app: postgresql
-      ports:
-        - protocol: TCP
-          port: 5432
+          port: 9090
     - to:
         - podSelector:
             matchLabels:
@@ -39,13 +32,6 @@ spec:
       ports:
         - protocol: TCP
           port: 9411
-    - to:
-        - podSelector:
-            matchLabels:
-              app: logstash
-      ports:
-        - protocol: TCP
-          port: 5044
     - to:
         - namespaceSelector: {}
       ports:

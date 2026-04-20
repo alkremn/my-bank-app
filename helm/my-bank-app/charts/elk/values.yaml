@@ -1,0 +1,18 @@
+fullnameOverride: elk
+elasticsearch:
+  image:
+    repository: docker.elastic.co/elasticsearch/elasticsearch
+    tag: "8.17.0"
+  storage:
+    size: 2Gi
+  javaOpts: "-Xms512m -Xmx512m"
+logstash:
+  image:
+    repository: docker.elastic.co/logstash/logstash
+    tag: "8.17.0"
+kibana:
+  image:
+    repository: docker.elastic.co/kibana/kibana
+    tag: "8.17.0"
+  service:
+    nodePort: 30561

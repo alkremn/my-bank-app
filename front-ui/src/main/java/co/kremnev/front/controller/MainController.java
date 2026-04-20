@@ -14,12 +14,17 @@ import co.kremnev.front.controller.dto.AccountDto;
 import co.kremnev.front.controller.dto.CashAction;
 import co.kremnev.front.service.BankService;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Controller
 public class MainController {
+
+    private static final Logger log = LoggerFactory.getLogger(MainController.class);
 
     private final BankService bankService;
 
@@ -35,6 +40,7 @@ public class MainController {
     @GetMapping("/account")
     public String getAccount(Model model, OAuth2AuthenticationToken auth) {
         String login = getLogin(auth);
+        log.debug("Loading account page for login={}", login);
         try {
             AccountResponse account = bankService.getAccount(login);
             model.addAttribute("name", account.name());
@@ -67,6 +73,7 @@ public class MainController {
     public String editCash(RedirectAttributes redirectAttributes, OAuth2AuthenticationToken auth,
                            @RequestParam("value") int value,
                            @RequestParam("action") CashAction action) {
+        log.info("Cash operation: login={}, action={}, value={}", getLogin(auth), action, value);
         try {
             bankService.processCash(getLogin(auth), value, action);
             String msg = action == CashAction.PUT
@@ -83,6 +90,7 @@ public class MainController {
     public String transfer(RedirectAttributes redirectAttributes, OAuth2AuthenticationToken auth,
                            @RequestParam("value") int value,
                            @RequestParam("login") String targetLogin) {
+        log.info("Transfer request: from={}, to={}, value={}", getLogin(auth), targetLogin, value);
         try {
             bankService.processTransfer(getLogin(auth), targetLogin, value);
             redirectAttributes.addFlashAttribute("info", "Успешно переведено %d руб".formatted(value));
