@@ -14,12 +14,22 @@ import java.util.Map;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class CashService {
 
     private final RestClient.Builder restClientBuilder;
     private final KafkaNotificationProducer notificationProducer;
     private final MeterRegistry meterRegistry;
+    private final String accountsServiceUrl;
+
+    public CashService(RestClient.Builder restClientBuilder,
+                       KafkaNotificationProducer notificationProducer,
+                       MeterRegistry meterRegistry,
+                       @org.springframework.beans.factory.annotation.Value("${accounts-service.url:http://accounts-service}") String accountsServiceUrl) {
+        this.restClientBuilder = restClientBuilder;
+        this.notificationProducer = notificationProducer;
+        this.meterRegistry = meterRegistry;
+        this.accountsServiceUrl = accountsServiceUrl;
+    }
 
     @CircuitBreaker(name = "cash-service", fallbackMethod = "depositFallback")
     public void deposit(String login, BigDecimal amount) {
@@ -46,7 +56,7 @@ public class CashService {
     private void updateBalance(String login, BigDecimal amount) {
         restClientBuilder.build()
                 .post()
-                .uri("http://accounts-service/accounts/{login}/balance", login)
+                .uri(accountsServiceUrl + "/accounts/{login}/balance", login)
                 .body(Map.of("amount", amount))
                 .retrieve()
                 .toBodilessEntity();

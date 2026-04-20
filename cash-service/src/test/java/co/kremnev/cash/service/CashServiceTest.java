@@ -29,7 +29,7 @@ class CashServiceTest {
 
     @BeforeEach
     void setUp() {
-        cashService = new CashService(restClientBuilder, notificationProducer, meterRegistry);
+        cashService = new CashService(restClientBuilder, notificationProducer, meterRegistry, "http://accounts-service");
     }
 
     @Test

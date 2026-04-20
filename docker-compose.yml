@@ -167,6 +167,7 @@ services:
       dockerfile: cash-service/Dockerfile
     container_name: my-bank-cash
     environment:
+      ACCOUNTS_SERVICE_URL: http://accounts-service:8082
       KEYCLOAK_JWK_URI: http://keycloak:8180/realms/my-bank/protocol/openid-connect/certs
       KEYCLOAK_TOKEN_URI: http://keycloak:8180/realms/my-bank/protocol/openid-connect/token
       OAUTH2_CLIENT_ID: cash-service-client
@@ -191,6 +192,7 @@ services:
       dockerfile: transfer-service/Dockerfile
     container_name: my-bank-transfer
     environment:
+      ACCOUNTS_SERVICE_URL: http://accounts-service:8082
       KEYCLOAK_JWK_URI: http://keycloak:8180/realms/my-bank/protocol/openid-connect/certs
       KEYCLOAK_TOKEN_URI: http://keycloak:8180/realms/my-bank/protocol/openid-connect/token
       OAUTH2_CLIENT_ID: transfer-service-client

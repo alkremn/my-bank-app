@@ -24,6 +24,7 @@ public class ResourceServerSecurityAutoConfiguration {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/actuator/**").permitAll()
                         .anyRequest().hasAuthority("SCOPE_" + props.getScope())
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> {

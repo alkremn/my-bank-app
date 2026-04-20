@@ -5,233 +5,227 @@ metadata:
 data:
   http-overview.json: |
     {
-      "dashboard": {
-        "title": "HTTP Overview",
-        "uid": "http-overview",
-        "panels": [
-          {
-            "title": "Request Rate (RPS)",
-            "type": "timeseries",
-            "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
-            "targets": [
-              {
-                "expr": "sum(rate(http_server_requests_seconds_count[1m])) by (application)",
-                "legendFormat": "{{`{{application}}`}}"
-              }
-            ],
-            "datasource": { "type": "prometheus", "uid": "prometheus" }
-          },
-          {
-            "title": "Error Rate (4xx + 5xx)",
-            "type": "timeseries",
-            "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
-            "targets": [
-              {
-                "expr": "sum(rate(http_server_requests_seconds_count{status=~\"4..|5..\"}[1m])) by (application)",
-                "legendFormat": "{{`{{application}}`}}"
-              }
-            ],
-            "datasource": { "type": "prometheus", "uid": "prometheus" }
-          },
-          {
-            "title": "Response Time p50",
-            "type": "timeseries",
-            "gridPos": { "h": 8, "w": 8, "x": 0, "y": 8 },
-            "targets": [
-              {
-                "expr": "histogram_quantile(0.5, sum(rate(http_server_requests_seconds_bucket[1m])) by (le, application))",
-                "legendFormat": "{{`{{application}}`}}"
-              }
-            ],
-            "datasource": { "type": "prometheus", "uid": "prometheus" }
-          },
-          {
-            "title": "Response Time p95",
-            "type": "timeseries",
-            "gridPos": { "h": 8, "w": 8, "x": 8, "y": 8 },
-            "targets": [
-              {
-                "expr": "histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket[1m])) by (le, application))",
-                "legendFormat": "{{`{{application}}`}}"
-              }
-            ],
-            "datasource": { "type": "prometheus", "uid": "prometheus" }
-          },
-          {
-            "title": "Response Time p99",
-            "type": "timeseries",
-            "gridPos": { "h": 8, "w": 8, "x": 16, "y": 8 },
-            "targets": [
-              {
-                "expr": "histogram_quantile(0.99, sum(rate(http_server_requests_seconds_bucket[1m])) by (le, application))",
-                "legendFormat": "{{`{{application}}`}}"
-              }
-            ],
-            "datasource": { "type": "prometheus", "uid": "prometheus" }
-          }
-        ],
-        "time": { "from": "now-1h", "to": "now" },
-        "refresh": "10s",
-        "schemaVersion": 39
-      }
+      "title": "HTTP Overview",
+      "uid": "http-overview",
+      "panels": [
+        {
+          "title": "Request Rate (RPS)",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+          "targets": [
+            {
+              "expr": "sum(rate(http_server_requests_seconds_count[1m])) by (application)",
+              "legendFormat": "{{`{{application}}`}}"
+            }
+          ],
+          "datasource": { "type": "prometheus", "uid": "prometheus" }
+        },
+        {
+          "title": "Error Rate (4xx + 5xx)",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+          "targets": [
+            {
+              "expr": "sum(rate(http_server_requests_seconds_count{status=~\"4..|5..\"}[1m])) by (application)",
+              "legendFormat": "{{`{{application}}`}}"
+            }
+          ],
+          "datasource": { "type": "prometheus", "uid": "prometheus" }
+        },
+        {
+          "title": "Response Time p50",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 8, "x": 0, "y": 8 },
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.5, sum(rate(http_server_requests_seconds_bucket[1m])) by (le, application))",
+              "legendFormat": "{{`{{application}}`}}"
+            }
+          ],
+          "datasource": { "type": "prometheus", "uid": "prometheus" }
+        },
+        {
+          "title": "Response Time p95",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 8, "x": 8, "y": 8 },
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket[1m])) by (le, application))",
+              "legendFormat": "{{`{{application}}`}}"
+            }
+          ],
+          "datasource": { "type": "prometheus", "uid": "prometheus" }
+        },
+        {
+          "title": "Response Time p99",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 8, "x": 16, "y": 8 },
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.99, sum(rate(http_server_requests_seconds_bucket[1m])) by (le, application))",
+              "legendFormat": "{{`{{application}}`}}"
+            }
+          ],
+          "datasource": { "type": "prometheus", "uid": "prometheus" }
+        }
+      ],
+      "time": { "from": "now-1h", "to": "now" },
+      "refresh": "10s",
+      "schemaVersion": 39
     }
   jvm-overview.json: |
     {
-      "dashboard": {
-        "title": "JVM Overview",
-        "uid": "jvm-overview",
-        "panels": [
-          {
-            "title": "Heap Memory Used",
-            "type": "timeseries",
-            "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
-            "targets": [
-              {
-                "expr": "jvm_memory_used_bytes{area=\"heap\"} / 1024 / 1024",
-                "legendFormat": "{{`{{application}}`}} - {{`{{id}}`}}"
-              }
-            ],
-            "fieldConfig": { "defaults": { "unit": "MiB" } },
-            "datasource": { "type": "prometheus", "uid": "prometheus" }
-          },
-          {
-            "title": "Non-Heap Memory Used",
-            "type": "timeseries",
-            "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
-            "targets": [
-              {
-                "expr": "jvm_memory_used_bytes{area=\"nonheap\"} / 1024 / 1024",
-                "legendFormat": "{{`{{application}}`}} - {{`{{id}}`}}"
-              }
-            ],
-            "fieldConfig": { "defaults": { "unit": "MiB" } },
-            "datasource": { "type": "prometheus", "uid": "prometheus" }
-          },
-          {
-            "title": "GC Pause Duration",
-            "type": "timeseries",
-            "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
-            "targets": [
-              {
-                "expr": "rate(jvm_gc_pause_seconds_sum[1m])",
-                "legendFormat": "{{`{{application}}`}} - {{`{{cause}}`}}"
-              }
-            ],
-            "fieldConfig": { "defaults": { "unit": "s" } },
-            "datasource": { "type": "prometheus", "uid": "prometheus" }
-          },
-          {
-            "title": "Live Threads",
-            "type": "timeseries",
-            "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
-            "targets": [
-              {
-                "expr": "jvm_threads_live_threads",
-                "legendFormat": "{{`{{application}}`}}"
-              }
-            ],
-            "datasource": { "type": "prometheus", "uid": "prometheus" }
-          },
-          {
-            "title": "Process CPU Usage",
-            "type": "timeseries",
-            "gridPos": { "h": 8, "w": 24, "x": 0, "y": 16 },
-            "targets": [
-              {
-                "expr": "process_cpu_usage",
-                "legendFormat": "{{`{{application}}`}}"
-              }
-            ],
-            "fieldConfig": { "defaults": { "unit": "percentunit" } },
-            "datasource": { "type": "prometheus", "uid": "prometheus" }
-          }
-        ],
-        "time": { "from": "now-1h", "to": "now" },
-        "refresh": "10s",
-        "schemaVersion": 39
-      }
+      "title": "JVM Overview",
+      "uid": "jvm-overview",
+      "panels": [
+        {
+          "title": "Heap Memory Used",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+          "targets": [
+            {
+              "expr": "jvm_memory_used_bytes{area=\"heap\"} / 1024 / 1024",
+              "legendFormat": "{{`{{application}}`}} - {{`{{id}}`}}"
+            }
+          ],
+          "fieldConfig": { "defaults": { "unit": "MiB" } },
+          "datasource": { "type": "prometheus", "uid": "prometheus" }
+        },
+        {
+          "title": "Non-Heap Memory Used",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+          "targets": [
+            {
+              "expr": "jvm_memory_used_bytes{area=\"nonheap\"} / 1024 / 1024",
+              "legendFormat": "{{`{{application}}`}} - {{`{{id}}`}}"
+            }
+          ],
+          "fieldConfig": { "defaults": { "unit": "MiB" } },
+          "datasource": { "type": "prometheus", "uid": "prometheus" }
+        },
+        {
+          "title": "GC Pause Duration",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+          "targets": [
+            {
+              "expr": "rate(jvm_gc_pause_seconds_sum[1m])",
+              "legendFormat": "{{`{{application}}`}} - {{`{{cause}}`}}"
+            }
+          ],
+          "fieldConfig": { "defaults": { "unit": "s" } },
+          "datasource": { "type": "prometheus", "uid": "prometheus" }
+        },
+        {
+          "title": "Live Threads",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+          "targets": [
+            {
+              "expr": "jvm_threads_live_threads",
+              "legendFormat": "{{`{{application}}`}}"
+            }
+          ],
+          "datasource": { "type": "prometheus", "uid": "prometheus" }
+        },
+        {
+          "title": "Process CPU Usage",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 24, "x": 0, "y": 16 },
+          "targets": [
+            {
+              "expr": "process_cpu_usage",
+              "legendFormat": "{{`{{application}}`}}"
+            }
+          ],
+          "fieldConfig": { "defaults": { "unit": "percentunit" } },
+          "datasource": { "type": "prometheus", "uid": "prometheus" }
+        }
+      ],
+      "time": { "from": "now-1h", "to": "now" },
+      "refresh": "10s",
+      "schemaVersion": 39
     }
   business-metrics.json: |
     {
-      "dashboard": {
-        "title": "Business Metrics",
-        "uid": "business-metrics",
-        "panels": [
-          {
-            "title": "Failed Withdrawals",
-            "type": "timeseries",
-            "gridPos": { "h": 8, "w": 8, "x": 0, "y": 0 },
-            "targets": [
-              {
-                "expr": "sum(rate(bank_withdrawal_failed_total[5m])) by (login)",
-                "legendFormat": "{{`{{login}}`}}"
-              }
-            ],
-            "datasource": { "type": "prometheus", "uid": "prometheus" }
-          },
-          {
-            "title": "Failed Transfers",
-            "type": "timeseries",
-            "gridPos": { "h": 8, "w": 8, "x": 8, "y": 0 },
-            "targets": [
-              {
-                "expr": "sum(rate(bank_transfer_failed_total[5m])) by (sender, receiver)",
-                "legendFormat": "{{`{{sender}}`}} -> {{`{{receiver}}`}}"
-              }
-            ],
-            "datasource": { "type": "prometheus", "uid": "prometheus" }
-          },
-          {
-            "title": "Failed Notification Sends",
-            "type": "timeseries",
-            "gridPos": { "h": 8, "w": 8, "x": 16, "y": 0 },
-            "targets": [
-              {
-                "expr": "sum(rate(bank_notification_send_failed_total[5m])) by (login)",
-                "legendFormat": "{{`{{login}}`}}"
-              }
-            ],
-            "datasource": { "type": "prometheus", "uid": "prometheus" }
-          },
-          {
-            "title": "Total Failed Withdrawals",
-            "type": "stat",
-            "gridPos": { "h": 4, "w": 8, "x": 0, "y": 8 },
-            "targets": [
-              {
-                "expr": "sum(bank_withdrawal_failed_total) or vector(0)",
-                "legendFormat": "Total"
-              }
-            ],
-            "datasource": { "type": "prometheus", "uid": "prometheus" }
-          },
-          {
-            "title": "Total Failed Transfers",
-            "type": "stat",
-            "gridPos": { "h": 4, "w": 8, "x": 8, "y": 8 },
-            "targets": [
-              {
-                "expr": "sum(bank_transfer_failed_total) or vector(0)",
-                "legendFormat": "Total"
-              }
-            ],
-            "datasource": { "type": "prometheus", "uid": "prometheus" }
-          },
-          {
-            "title": "Total Failed Notification Sends",
-            "type": "stat",
-            "gridPos": { "h": 4, "w": 8, "x": 16, "y": 8 },
-            "targets": [
-              {
-                "expr": "sum(bank_notification_send_failed_total) or vector(0)",
-                "legendFormat": "Total"
-              }
-            ],
-            "datasource": { "type": "prometheus", "uid": "prometheus" }
-          }
-        ],
-        "time": { "from": "now-1h", "to": "now" },
-        "refresh": "10s",
-        "schemaVersion": 39
-      }
+      "title": "Business Metrics",
+      "uid": "business-metrics",
+      "panels": [
+        {
+          "title": "Failed Withdrawals",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 8, "x": 0, "y": 0 },
+          "targets": [
+            {
+              "expr": "sum(rate(bank_withdrawal_failed_total[5m])) by (login)",
+              "legendFormat": "{{`{{login}}`}}"
+            }
+          ],
+          "datasource": { "type": "prometheus", "uid": "prometheus" }
+        },
+        {
+          "title": "Failed Transfers",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 8, "x": 8, "y": 0 },
+          "targets": [
+            {
+              "expr": "sum(rate(bank_transfer_failed_total[5m])) by (sender, receiver)",
+              "legendFormat": "{{`{{sender}}`}} -> {{`{{receiver}}`}}"
+            }
+          ],
+          "datasource": { "type": "prometheus", "uid": "prometheus" }
+        },
+        {
+          "title": "Failed Notification Sends",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 8, "x": 16, "y": 0 },
+          "targets": [
+            {
+              "expr": "sum(rate(bank_notification_send_failed_total[5m])) by (login)",
+              "legendFormat": "{{`{{login}}`}}"
+            }
+          ],
+          "datasource": { "type": "prometheus", "uid": "prometheus" }
+        },
+        {
+          "title": "Total Failed Withdrawals",
+          "type": "stat",
+          "gridPos": { "h": 4, "w": 8, "x": 0, "y": 8 },
+          "targets": [
+            {
+              "expr": "sum(bank_withdrawal_failed_total) or vector(0)",
+              "legendFormat": "Total"
+            }
+          ],
+          "datasource": { "type": "prometheus", "uid": "prometheus" }
+        },
+        {
+          "title": "Total Failed Transfers",
+          "type": "stat",
+          "gridPos": { "h": 4, "w": 8, "x": 8, "y": 8 },
+          "targets": [
+            {
+              "expr": "sum(bank_transfer_failed_total) or vector(0)",
+              "legendFormat": "Total"
+            }
+          ],
+          "datasource": { "type": "prometheus", "uid": "prometheus" }
+        },
+        {
+          "title": "Total Failed Notification Sends",
+          "type": "stat",
+          "gridPos": { "h": 4, "w": 8, "x": 16, "y": 8 },
+          "targets": [
+            {
+              "expr": "sum(bank_notification_send_failed_total) or vector(0)",
+              "legendFormat": "Total"
+            }
+          ],
+          "datasource": { "type": "prometheus", "uid": "prometheus" }
+        }
+      ],
+      "time": { "from": "now-1h", "to": "now" },
+      "refresh": "10s",
+      "schemaVersion": 39
     }

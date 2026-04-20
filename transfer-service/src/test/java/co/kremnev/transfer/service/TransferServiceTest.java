@@ -29,7 +29,7 @@ class TransferServiceTest {
 
     @BeforeEach
     void setUp() {
-        transferService = new TransferService(restClientBuilder, notificationProducer, meterRegistry);
+        transferService = new TransferService(restClientBuilder, notificationProducer, meterRegistry, "http://accounts-service");
     }
 
     @Test
