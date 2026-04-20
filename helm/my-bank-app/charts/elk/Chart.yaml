@@ -1,0 +1,4 @@
+apiVersion: v2
+name: elk
+description: ELK stack (Elasticsearch, Logstash, Kibana) for My Bank App
+version: 1.0.0

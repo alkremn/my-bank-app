@@ -1,0 +1,29 @@
+groups:
+  - name: bank-business-alerts
+    rules:
+      - alert: HighWithdrawalFailureRate
+        expr: rate(bank_withdrawal_failed_total[5m]) > 1
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High withdrawal failure rate"
+          description: "Withdrawal failures exceed 1/sec for 1 minute"
+
+      - alert: HighTransferFailureRate
+        expr: rate(bank_transfer_failed_total[5m]) > 1
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High transfer failure rate"
+          description: "Transfer failures exceed 1/sec for 1 minute"
+
+      - alert: HighNotificationSendFailureRate
+        expr: rate(bank_notification_send_failed_total[5m]) > 2
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High notification send failure rate"
+          description: "Notification send failures exceed 2/sec for 1 minute"

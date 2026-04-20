@@ -39,6 +39,10 @@ accounts-service:
     DB_USERNAME: bankuser
     KEYCLOAK_JWK_URI: http://keycloak:8180/realms/my-bank/protocol/openid-connect/certs
     KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    ZIPKIN_URL: http://zipkin:9411/api/v2/spans
+    LOGSTASH_HOST: logstash
+    LOGSTASH_PORT: "5044"
+    SPRING_PROFILES_ACTIVE: k8s
   secrets:
     DB_PASSWORD: bankpass
 
@@ -53,6 +57,10 @@ cash-service:
     KEYCLOAK_TOKEN_URI: http://keycloak:8180/realms/my-bank/protocol/openid-connect/token
     OAUTH2_CLIENT_ID: cash-service-client
     KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    ZIPKIN_URL: http://zipkin:9411/api/v2/spans
+    LOGSTASH_HOST: logstash
+    LOGSTASH_PORT: "5044"
+    SPRING_PROFILES_ACTIVE: k8s
   secrets:
     OAUTH2_CLIENT_SECRET: cash-secret
 
@@ -67,6 +75,10 @@ transfer-service:
     KEYCLOAK_TOKEN_URI: http://keycloak:8180/realms/my-bank/protocol/openid-connect/token
     OAUTH2_CLIENT_ID: transfer-service-client
     KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    ZIPKIN_URL: http://zipkin:9411/api/v2/spans
+    LOGSTASH_HOST: logstash
+    LOGSTASH_PORT: "5044"
+    SPRING_PROFILES_ACTIVE: k8s
   secrets:
     OAUTH2_CLIENT_SECRET: transfer-secret
 
@@ -80,6 +92,10 @@ notification-service:
     DB_URL: jdbc:postgresql://postgresql:5432/bankdb?currentSchema=notifications
     DB_USERNAME: bankuser
     KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    ZIPKIN_URL: http://zipkin:9411/api/v2/spans
+    LOGSTASH_HOST: logstash
+    LOGSTASH_PORT: "5044"
+    SPRING_PROFILES_ACTIVE: k8s
   secrets:
     DB_PASSWORD: bankpass
 
@@ -98,3 +114,7 @@ front-ui:
     KEYCLOAK_JWK_URI: http://keycloak:8180/realms/my-bank/protocol/openid-connect/certs
     KEYCLOAK_USERINFO_URI: http://keycloak:8180/realms/my-bank/protocol/openid-connect/userinfo
     KEYCLOAK_LOGOUT_URI: http://localhost:30180/realms/my-bank/protocol/openid-connect/logout
+    ZIPKIN_URL: http://zipkin:9411/api/v2/spans
+    LOGSTASH_HOST: logstash
+    LOGSTASH_PORT: "5044"
+    SPRING_PROFILES_ACTIVE: k8s

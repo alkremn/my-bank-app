@@ -1,0 +1,31 @@
+global:
+  scrape_interval: 15s
+
+rule_files:
+  - prometheus-alerts.yml
+
+scrape_configs:
+  - job_name: accounts-service
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets: ['accounts-service:8082']
+
+  - job_name: cash-service
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets: ['cash-service:8083']
+
+  - job_name: transfer-service
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets: ['transfer-service:8084']
+
+  - job_name: notification-service
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets: ['notification-service:8085']
+
+  - job_name: front-ui
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets: ['front-ui:8080']

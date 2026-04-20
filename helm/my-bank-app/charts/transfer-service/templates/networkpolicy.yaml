@@ -24,6 +24,13 @@ spec:
       ports:
         - protocol: TCP
           port: {{ .Values.containerPort }}
+    - from:
+        - podSelector:
+            matchLabels:
+              app: prometheus
+      ports:
+        - protocol: TCP
+          port: {{ .Values.containerPort }}
   egress:
     - to:
         - podSelector:
@@ -46,6 +53,20 @@ spec:
       ports:
         - protocol: TCP
           port: 8180
+    - to:
+        - podSelector:
+            matchLabels:
+              app: zipkin
+      ports:
+        - protocol: TCP
+          port: 9411
+    - to:
+        - podSelector:
+            matchLabels:
+              app: logstash
+      ports:
+        - protocol: TCP
+          port: 5044
     - to:
         - namespaceSelector: {}
       ports:

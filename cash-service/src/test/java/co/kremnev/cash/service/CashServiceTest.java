@@ -1,6 +1,8 @@
 package co.kremnev.cash.service;
 
 import co.kremnev.starter.KafkaNotificationProducer;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,11 +23,13 @@ class CashServiceTest {
     @Mock
     private KafkaNotificationProducer notificationProducer;
 
+    private final MeterRegistry meterRegistry = new SimpleMeterRegistry();
+
     private CashService cashService;
 
     @BeforeEach
     void setUp() {
-        cashService = new CashService(restClientBuilder, notificationProducer);
+        cashService = new CashService(restClientBuilder, notificationProducer, meterRegistry, "http://accounts-service");
     }
 
     @Test

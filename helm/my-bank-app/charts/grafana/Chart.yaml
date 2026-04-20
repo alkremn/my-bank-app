@@ -1,0 +1,4 @@
+apiVersion: v2
+name: grafana
+description: Grafana dashboards and visualization for My Bank App
+version: 1.0.0

@@ -1,6 +1,8 @@
 package co.kremnev.transfer.service;
 
 import co.kremnev.starter.KafkaNotificationProducer;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,11 +23,13 @@ class TransferServiceTest {
     @Mock
     private KafkaNotificationProducer notificationProducer;
 
+    private final MeterRegistry meterRegistry = new SimpleMeterRegistry();
+
     private TransferService transferService;
 
     @BeforeEach
     void setUp() {
-        transferService = new TransferService(restClientBuilder, notificationProducer);
+        transferService = new TransferService(restClientBuilder, notificationProducer, meterRegistry, "http://accounts-service");
     }
 
     @Test

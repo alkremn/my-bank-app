@@ -54,6 +54,67 @@ services:
       retries: 5
       start_period: 30s
 
+  zipkin:
+    image: openzipkin/zipkin:3
+    container_name: my-bank-zipkin
+    ports:
+      - "9411:9411"
+
+  prometheus:
+    image: prom/prometheus:v3.3.0
+    container_name: my-bank-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./docker/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./docker/prometheus-alerts.yml:/etc/prometheus/prometheus-alerts.yml
+      - prometheus-data:/prometheus
+
+  grafana:
+    image: grafana/grafana:11.6.0
+    container_name: my-bank-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    volumes:
+      - ./docker/grafana/provisioning:/etc/grafana/provisioning
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      - prometheus
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.17.0
+    container_name: my-bank-elasticsearch
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: "false"
+      ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.17.0
+    container_name: my-bank-logstash
+    ports:
+      - "5044:5044"
+    volumes:
+      - ./docker/logstash/pipeline:/usr/share/logstash/pipeline
+    depends_on:
+      - elasticsearch
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.17.0
+    container_name: my-bank-kibana
+    ports:
+      - "5601:5601"
+    environment:
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+    depends_on:
+      - elasticsearch
+
   accounts-service:
     image: my-bank/accounts-service:latest
     build:
@@ -66,6 +127,10 @@ services:
       DB_PASSWORD: bankpass
       KEYCLOAK_JWK_URI: http://keycloak:8180/realms/my-bank/protocol/openid-connect/certs
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      ZIPKIN_URL: http://zipkin:9411/api/v2/spans
+      LOGSTASH_HOST: logstash
+      LOGSTASH_PORT: "5044"
+      SPRING_PROFILES_ACTIVE: docker
     depends_on:
       postgres:
         condition: service_started
@@ -85,6 +150,10 @@ services:
       DB_USERNAME: bankuser
       DB_PASSWORD: bankpass
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      ZIPKIN_URL: http://zipkin:9411/api/v2/spans
+      LOGSTASH_HOST: logstash
+      LOGSTASH_PORT: "5044"
+      SPRING_PROFILES_ACTIVE: docker
     depends_on:
       postgres:
         condition: service_started
@@ -98,11 +167,16 @@ services:
       dockerfile: cash-service/Dockerfile
     container_name: my-bank-cash
     environment:
+      ACCOUNTS_SERVICE_URL: http://accounts-service:8082
       KEYCLOAK_JWK_URI: http://keycloak:8180/realms/my-bank/protocol/openid-connect/certs
       KEYCLOAK_TOKEN_URI: http://keycloak:8180/realms/my-bank/protocol/openid-connect/token
       OAUTH2_CLIENT_ID: cash-service-client
       OAUTH2_CLIENT_SECRET: cash-secret
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      ZIPKIN_URL: http://zipkin:9411/api/v2/spans
+      LOGSTASH_HOST: logstash
+      LOGSTASH_PORT: "5044"
+      SPRING_PROFILES_ACTIVE: docker
     depends_on:
       accounts-service:
         condition: service_started
@@ -118,11 +192,16 @@ services:
       dockerfile: transfer-service/Dockerfile
     container_name: my-bank-transfer
     environment:
+      ACCOUNTS_SERVICE_URL: http://accounts-service:8082
       KEYCLOAK_JWK_URI: http://keycloak:8180/realms/my-bank/protocol/openid-connect/certs
       KEYCLOAK_TOKEN_URI: http://keycloak:8180/realms/my-bank/protocol/openid-connect/token
       OAUTH2_CLIENT_ID: transfer-service-client
       OAUTH2_CLIENT_SECRET: transfer-secret
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      ZIPKIN_URL: http://zipkin:9411/api/v2/spans
+      LOGSTASH_HOST: logstash
+      LOGSTASH_PORT: "5044"
+      SPRING_PROFILES_ACTIVE: docker
     depends_on:
       accounts-service:
         condition: service_started
@@ -147,6 +226,10 @@ services:
       KEYCLOAK_TOKEN_URI: http://keycloak:8180/realms/my-bank/protocol/openid-connect/token
       KEYCLOAK_JWK_URI: http://keycloak:8180/realms/my-bank/protocol/openid-connect/certs
       KEYCLOAK_USERINFO_URI: http://keycloak:8180/realms/my-bank/protocol/openid-connect/userinfo
+      ZIPKIN_URL: http://zipkin:9411/api/v2/spans
+      LOGSTASH_HOST: logstash
+      LOGSTASH_PORT: "5044"
+      SPRING_PROFILES_ACTIVE: docker
     depends_on:
       accounts-service:
         condition: service_started
@@ -160,3 +243,6 @@ services:
 volumes:
   postgres-data:
   kafka-data:
+  prometheus-data:
+  grafana-data:
+  elasticsearch-data:

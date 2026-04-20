@@ -21,3 +21,11 @@ dependencies:
     version: 1.0.0
   - name: front-ui
     version: 1.0.0
+  - name: zipkin
+    version: 1.0.0
+  - name: prometheus
+    version: 1.0.0
+  - name: grafana
+    version: 1.0.0
+  - name: elk
+    version: 1.0.0

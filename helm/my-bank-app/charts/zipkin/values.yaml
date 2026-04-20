@@ -1,0 +1,5 @@
+fullnameOverride: zipkin
+image:
+  repository: openzipkin/zipkin
+  tag: "3"
+containerPort: 9411
