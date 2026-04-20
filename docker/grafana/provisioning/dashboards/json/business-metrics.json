@@ -1,0 +1,83 @@
+{
+  "dashboard": {
+    "title": "Business Metrics",
+    "uid": "business-metrics",
+    "panels": [
+      {
+        "title": "Failed Withdrawals",
+        "type": "timeseries",
+        "gridPos": { "h": 8, "w": 8, "x": 0, "y": 0 },
+        "targets": [
+          {
+            "expr": "sum(rate(bank_withdrawal_failed_total[5m])) by (login)",
+            "legendFormat": "{{login}}"
+          }
+        ],
+        "datasource": { "type": "prometheus", "uid": "prometheus" }
+      },
+      {
+        "title": "Failed Transfers",
+        "type": "timeseries",
+        "gridPos": { "h": 8, "w": 8, "x": 8, "y": 0 },
+        "targets": [
+          {
+            "expr": "sum(rate(bank_transfer_failed_total[5m])) by (sender, receiver)",
+            "legendFormat": "{{sender}} -> {{receiver}}"
+          }
+        ],
+        "datasource": { "type": "prometheus", "uid": "prometheus" }
+      },
+      {
+        "title": "Failed Notification Sends",
+        "type": "timeseries",
+        "gridPos": { "h": 8, "w": 8, "x": 16, "y": 0 },
+        "targets": [
+          {
+            "expr": "sum(rate(bank_notification_send_failed_total[5m])) by (login)",
+            "legendFormat": "{{login}}"
+          }
+        ],
+        "datasource": { "type": "prometheus", "uid": "prometheus" }
+      },
+      {
+        "title": "Total Failed Withdrawals",
+        "type": "stat",
+        "gridPos": { "h": 4, "w": 8, "x": 0, "y": 8 },
+        "targets": [
+          {
+            "expr": "sum(bank_withdrawal_failed_total) or vector(0)",
+            "legendFormat": "Total"
+          }
+        ],
+        "datasource": { "type": "prometheus", "uid": "prometheus" }
+      },
+      {
+        "title": "Total Failed Transfers",
+        "type": "stat",
+        "gridPos": { "h": 4, "w": 8, "x": 8, "y": 8 },
+        "targets": [
+          {
+            "expr": "sum(bank_transfer_failed_total) or vector(0)",
+            "legendFormat": "Total"
+          }
+        ],
+        "datasource": { "type": "prometheus", "uid": "prometheus" }
+      },
+      {
+        "title": "Total Failed Notification Sends",
+        "type": "stat",
+        "gridPos": { "h": 4, "w": 8, "x": 16, "y": 8 },
+        "targets": [
+          {
+            "expr": "sum(bank_notification_send_failed_total) or vector(0)",
+            "legendFormat": "Total"
+          }
+        ],
+        "datasource": { "type": "prometheus", "uid": "prometheus" }
+      }
+    ],
+    "time": { "from": "now-1h", "to": "now" },
+    "refresh": "10s",
+    "schemaVersion": 39
+  }
+}
