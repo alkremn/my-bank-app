@@ -2,8 +2,10 @@ package co.kremnev.cash.service;
 
 import co.kremnev.starter.KafkaNotificationProducer;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
 
 import java.math.BigDecimal;
@@ -15,6 +17,7 @@ public class CashService {
 
     private final RestClient.Builder restClientBuilder;
     private final KafkaNotificationProducer notificationProducer;
+    private final MeterRegistry meterRegistry;
 
     @CircuitBreaker(name = "cash-service", fallbackMethod = "depositFallback")
     public void deposit(String login, BigDecimal amount) {
@@ -24,7 +27,12 @@ public class CashService {
 
     @CircuitBreaker(name = "cash-service", fallbackMethod = "withdrawFallback")
     public void withdraw(String login, BigDecimal amount) {
-        updateBalance(login, amount.negate());
+        try {
+            updateBalance(login, amount.negate());
+        } catch (HttpClientErrorException.BadRequest e) {
+            meterRegistry.counter("bank.withdrawal.failed", "login", login).increment();
+            throw e;
+        }
         notificationProducer.send(login, "Withdrawal: -" + amount);
     }
 

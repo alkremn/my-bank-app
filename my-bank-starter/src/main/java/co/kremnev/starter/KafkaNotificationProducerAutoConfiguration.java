@@ -1,5 +1,7 @@
 package co.kremnev.starter;
 
+import io.micrometer.core.instrument.MeterRegistry;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -15,7 +17,8 @@ public class KafkaNotificationProducerAutoConfiguration {
     @ConditionalOnMissingBean
     public KafkaNotificationProducer kafkaNotificationProducer(
             KafkaTemplate<String, ?> kafkaTemplate,
-            @Value("${my-bank.notification.topic:notifications}") String topic) {
-        return new KafkaNotificationProducer(kafkaTemplate, topic);
+            @Value("${my-bank.notification.topic:notifications}") String topic,
+            ObjectProvider<MeterRegistry> meterRegistryProvider) {
+        return new KafkaNotificationProducer(kafkaTemplate, topic, meterRegistryProvider.getIfAvailable());
     }
 }
